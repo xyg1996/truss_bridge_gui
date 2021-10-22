@@ -227,22 +227,20 @@ class Workspace(QWidget):
         ## 调整paraview和日志显示的初始上下显示比例
         self.main_splitter.setStretchFactor(0,1)
         self.main_splitter.setStretchFactor(1,8)
-        ### 禁用进度显示选项卡，开始计算后激活
+        ## 禁用*计算进度*显示选项卡，开始计算后激活
         self.log_tab_widget.setTabEnabled(1,False)
+        ## 启用外部进程
         self.process = QtCore.QProcess(self)
         self.process1 = QtCore.QProcess(self)
         self.process2 = QtCore.QProcess(self)
         self.process.readyRead.connect(self.dataReady)
         self.process2.readyRead.connect(self.dataReady)
         # self.process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-        self.width1 = int(self.work_space_tool.ui.width_lineEdit.text())
-        self.length = int(self.work_space_tool.ui.length_lineEdit.text())
-        self.height1 = int(self.work_space_tool.ui.height_lineEdit.text())
-        self.sections = int(self.work_space_tool.ui.sections_lineEdit.text())
-        self.spacing = int(self.work_space_tool.ui.spacing_lineEdit.text())
 
-        # 确认修改
-        self.work_space_tool.ui.pushButton_ok.clicked.connect(self.cal_spacing) # 还原
+
+        # 确认按钮
+        self.work_space_tool.ui.pushButton_ok.clicked.connect(self.cal_spacing)
+        # 还原按钮
         self.work_space_tool.ui.pushButton_reset.clicked.connect(self.reset)
         # 打开open foam文件
         self.work_space_tool.ui.pushButton_2.clicked.connect(lambda:self.open_openfoam_file(self.workingdirectory))
@@ -263,7 +261,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.pushButton_11.clicked.connect(lambda:self.log_tab_widget.setTabEnabled(1,True)) 
         self.work_space_tool.ui.pushButton_11.clicked.connect(self.prepare_computing)
         # 切换前处理、计算、后处理
-        self.work_space_tool.ui.tabWidget.currentChanged['int'].connect(self.mian_tab_change)
+        self.work_space_tool.ui.tabWidget.currentChanged['int'].connect(self.main_tab_change)
         # 打开工程
         #self.work_space_tool.ui.pushButton_16.clicked.connect(self.reload)
         # 中止
@@ -272,14 +270,49 @@ class Workspace(QWidget):
         self.work_space_tool.ui.pushButton_13.clicked.connect(self.continue_to_calculate)
         
         self.openfoam_error.connect(self.show_openfoam_error)
+    def check_parameter_isnum(self,num):
+        try:
+            num = float(num)
+            s=str(num).split('.')
+            if float(s[1])==0:
+                print('整数')
+            else :
+                print('小数')
+        except:
+            print("输入的不是数字!")
+            QtWidgets.QMessageBox.information(self, '错误', '请输入数字!')
 
-    def cal_spacing(self): 
-        self.width1 = int(self.work_space_tool.ui.width_lineEdit.text())
-        self.length = int(self.work_space_tool.ui.length_lineEdit.text())
-        self.height1 = int(self.work_space_tool.ui.height_lineEdit.text())
+    def check_iseven(self,num):
+        s=str(float(num)).split('.')
+        if float(s[1])==0:
+            print('整数')
+            if (int(num) % 2 == 0):
+                return True
+            else:
+                QtWidgets.QMessageBox.information(self, '错误', '节点数必须是偶数!')
+                return False
+        else :
+            print('小数')
+            QtWidgets.QMessageBox.information(self, '错误', '节点数必须是偶数!')
+            return False
+
+    def cal_spacing(self):
+        self.width1 = self.work_space_tool.ui.width_lineEdit.text()
+        self.length = self.work_space_tool.ui.length_lineEdit.text()
+        self.height1 = self.work_space_tool.ui.height_lineEdit.text()
+        self.sections = self.work_space_tool.ui.sections_lineEdit.text()
+        self.spacing = self.work_space_tool.ui.spacing_lineEdit.text() 
+        parameters=[self.width1,self.length,self.height1,self.sections]
+        for i in parameters:
+            print('i:',i)
+            self.check_parameter_isnum(i)
+        #self.check_iseven(self.sections)
+        #self.width1 = float(self.work_space_tool.ui.width_lineEdit.text())
+        self.length = float(self.work_space_tool.ui.length_lineEdit.text())
+        #self.height1 = float(self.work_space_tool.ui.height_lineEdit.text())
         self.sections = int(self.work_space_tool.ui.sections_lineEdit.text())
-        self.spacing = int(self.work_space_tool.ui.spacing_lineEdit.text())
-        self.spacing = int(self.length/self.sections)
+        #self.spacing = float(self.work_space_tool.ui.spacing_lineEdit.text())
+        self.spacing = float('%.2f' % (self.length/self.sections))
         self.work_space_tool.ui.spacing_lineEdit.setText(str(self.spacing))
 
         fname = 'Mesh_1.med' #网格文件
@@ -289,8 +322,12 @@ class Workspace(QWidget):
         script_dir = os.path.join(self.work_dir,script_name)
         script_dir_curr = os.path.join(self.curr_dir,script_name)
         self.change_bridge(script_dir)
-        time.sleep(0.5)
-        exec(open(script_dir).read())
+        time.sleep(0.25)
+        try:
+            if(self.check_iseven(self.sections)):
+                exec(open(script_dir).read())
+        except:
+            print("脚本错误!")
         self.show_mesh_1(fdir_curr)
 
     def reset(self):
@@ -299,6 +336,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.height_lineEdit.setText('5')
         self.work_space_tool.ui.sections_lineEdit.setText('8')
         self.work_space_tool.ui.spacing_lineEdit.setText('5')
+        self.cal_spacing()
 
     def show_mesh_1(self,fdir):
         '''
@@ -311,6 +349,7 @@ class Workspace(QWidget):
                 pvs.Delete(current_display)
                 print('delete ok')
                 self.process.start('echo 清除当前显示')
+                self.process.waitForFinished()
         except Exception as e:
             print(e)
             pass
@@ -320,6 +359,7 @@ class Workspace(QWidget):
         self.res = pvs.MEDReader(FileName=fdir)
         self.ren_view = pvs.GetRenderView()
         self.foamDisplay =pvs.Show(self.res, self.ren_view)
+        #self.foamDisplay.SetRepresentationType('Surface With Edges')
         self.currentdisplay = self.foamDisplay
         # The following two lines insure that the view is refreshed
         self.pv_splitter.setVisible(False)
@@ -659,7 +699,7 @@ class Workspace(QWidget):
                 pass
 
     
-    def mian_tab_change(self,index):
+    def main_tab_change(self,index):
         '''
             前处理，计算，后处理标签点击触发的函数
             index = 1 代表计算
