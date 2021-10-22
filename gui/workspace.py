@@ -1,6 +1,7 @@
 import sys
 import os
 import shutil
+import time
 import pvsimple as pvs
 from .commonfunction import LoadingMessage
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -153,6 +154,7 @@ class Workspace(QWidget):
     minmax_btn = infobar_label = shown = filename_label = None
     set_workingdir = pyqtSignal(str)
     openfoam_error = pyqtSignal(str)
+    
     def __init__(self, astergui, parent=None):
         super(Workspace,self).__init__()
         self.pv_view = None
@@ -163,6 +165,9 @@ class Workspace(QWidget):
         # pimplefoam_root 是default文件alternative文件的上层文件夹，其中文件是用来配置openfoam的
         #self.pimplefoam_root = '/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy'
         self.pimplefoam_root ='/usr/salome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/'
+        self.curr_dir = os.popen('echo `pwd`').read()[0:-1]
+        self.work_dir = '/home/export/online3/amd_share/truss_bridge_app'
+        print(self.work_dir)
         # 主窗口为横向布局，并添加了分割器
         self.horizontalLayout = QtWidgets.QHBoxLayout(self) #实例化横向布局管理器
         self.main_splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal, self) #实例化分割器
@@ -276,7 +281,18 @@ class Workspace(QWidget):
         self.spacing = int(self.work_space_tool.ui.spacing_lineEdit.text())
         self.spacing = int(self.length/self.sections)
         self.work_space_tool.ui.spacing_lineEdit.setText(str(self.spacing))
-    
+
+        fname = 'Mesh_1.med' #网格文件
+        script_name = 'create_geo_mesh.py' #参数化脚本
+        fdir = os.path.join(self.work_dir,fname)
+        fdir_curr = os.path.join(self.curr_dir,fname)
+        script_dir = os.path.join(self.work_dir,script_name)
+        script_dir_curr = os.path.join(self.curr_dir,script_name)
+        self.change_bridge(script_dir)
+        time.sleep(0.5)
+        exec(open(script_dir).read())
+        self.show_mesh_1(fdir_curr)
+
     def reset(self):
         self.work_space_tool.ui.width_lineEdit.setText('7')
         self.work_space_tool.ui.length_lineEdit.setText('40')
@@ -284,6 +300,56 @@ class Workspace(QWidget):
         self.work_space_tool.ui.sections_lineEdit.setText('8')
         self.work_space_tool.ui.spacing_lineEdit.setText('5')
 
+    def show_mesh_1(self,fdir):
+        '''
+            显示网格
+        '''
+        #boundary_file = self.workingdirectory + '/constant/polyMesh/boundary'
+        try:
+            if self.currentdisplay:
+                current_display = pvs.GetActiveSource()
+                pvs.Delete(current_display)
+                print('delete ok')
+                self.process.start('echo 清除当前显示')
+        except Exception as e:
+            print(e)
+            pass
+        self.process.start('echo 开始显示网格...')
+        self.process.waitForFinished()
+        #self.show_mesh_display_list(boundary_file)
+        self.res = pvs.MEDReader(FileName=fdir)
+        self.ren_view = pvs.GetRenderView()
+        self.foamDisplay =pvs.Show(self.res, self.ren_view)
+        self.currentdisplay = self.foamDisplay
+        # The following two lines insure that the view is refreshed
+        self.pv_splitter.setVisible(False)
+        self.pv_splitter.setVisible(True)
+        self.process.start('echo 网格已显示')
+        self.process.waitForFinished()
+        '''boundary_file_root = self.workingdirectory + '/constant/polyMesh/boundary'
+        self.work_space_tool.BCDialog = QDialog()
+        self.work_space_tool.bod_man = Ui_boundary_form()
+        self.work_space_tool.bod_man.setupUi(self.work_space_tool.BCDialog,self.workingdirectory,self.pimplefoam_root, boundary_file_root)
+        self.work_space_tool.mod_man.Model_selecting.connect(self.update_dialog_by_model_and_boundary)
+        self.work_space_tool.BCDialog.setWindowModality(Qt.ApplicationModal)
+        self.work_space_tool.bod_man.MainDialog.setWindowModality(Qt.ApplicationModal)'''
+
+    def change_bridge(self,fdir):
+        data = ''
+        with open(fdir, 'r+') as f:
+            for line in f.readlines():
+                if(line.find('width') == 0):
+                    line = 'width = %s' % (str(self.width1)) + '\n'
+                if(line.find('height') == 0):
+                    line = 'height = %s' % (str(self.height1)) + '\n'
+                if(line.find('length') == 0):
+                    line = 'length = %s' % (str(self.length)) + '\n'
+                if(line.find('sections') == 0):
+                    line = 'sections = %s' % (str(self.sections)) + '\n'
+                data += line
+        with open(fdir, 'r+') as f:
+            f.writelines(data)
+        #f.close()
 
     def show_openfoam_error(self,txt):
         self.process.waitForFinished()
