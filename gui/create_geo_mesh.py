@@ -8,8 +8,13 @@ import sys
 import salome
 
 import os
+### linux work_dir
 work_dir = os.popen('echo `pwd`').read()
+### linux work_dir
 
+#work_dir =  os.getcwd()
+
+print('work_dir:',work_dir)
 
 salome.salome_init()
 import salome_notebook
@@ -17,17 +22,16 @@ notebook = salome_notebook.NoteBook()
 #sys.path.insert(0, r'/home/export/online3/amd_share/truss_bridge_app')
 
 ###
-### SHAPER component
+### SHAPER component 参数化建模
 ###
 
 from SketchAPI import *
-
 from salome.shaper import model
-### parameter
-width = 20
+### set parameters
+width = 5
 height = 5
 length = 50
-sections = 20
+sections = 6
 spacing = length/sections
 ###
 model.begin()
@@ -93,6 +97,8 @@ Polyline_7 = model.addPolyline3D(Part_1_doc, [model.selection("VERTEX", "Point_1
 LinearCopy_6 = model.addMultiTranslation(Part_1_doc, [model.selection("COMPOUND", "all-in-Polyline_7")], model.selection("EDGE", "PartSet/OX"), "spacing", "sections/2+1")
 Symmetry_1_objects = [model.selection("COMPOUND", "LinearCopy_1_1"), model.selection("COMPOUND", "LinearCopy_3_1"), model.selection("COMPOUND", "LinearCopy_3_2"), model.selection("COMPOUND", "LinearCopy_3_3"), model.selection("COMPOUND", "LinearCopy_3_4"), model.selection("COMPOUND", "LinearCopy_4_1"), model.selection("COMPOUND", "LinearCopy_5_1"), model.selection("COMPOUND", "LinearCopy_6_1")]
 Symmetry_1 = model.addSymmetry(Part_1_doc, Symmetry_1_objects, model.selection("FACE", "PartSet/YOZ"), True)
+### linux work_dir
+
 Export_1 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_38aewvdt.xao', model.selection("COMPOUND", "Symmetry_1_1"), 'XAO')
 Export_2 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_psxtkyub.xao', model.selection("COMPOUND", "Symmetry_1_2"), 'XAO')
 Export_3 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_adr_mof0.xao', model.selection("COMPOUND", "Symmetry_1_3"), 'XAO')
@@ -102,10 +108,20 @@ Export_6 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_
 Export_7 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_c503qf1h.xao', model.selection("COMPOUND", "Symmetry_1_7"), 'XAO')
 Export_8 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir)-1)]+'/shaper_jmx8crsu.xao', model.selection("COMPOUND", "Symmetry_1_8"), 'XAO')
 
+### linux work_dir
+'''Export_1 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_38aewvdt.xao', model.selection("COMPOUND", "Symmetry_1_1"), 'XAO')
+Export_2 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_psxtkyub.xao', model.selection("COMPOUND", "Symmetry_1_2"), 'XAO')
+Export_3 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_adr_mof0.xao', model.selection("COMPOUND", "Symmetry_1_3"), 'XAO')
+Export_4 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_ho2dmb_g.xao', model.selection("COMPOUND", "Symmetry_1_4"), 'XAO')
+Export_5 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_fiasnwck.xao', model.selection("COMPOUND", "Symmetry_1_5"), 'XAO')
+Export_6 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_a4lvhf2x.xao', model.selection("COMPOUND", "Symmetry_1_6"), 'XAO')
+Export_7 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_c503qf1h.xao', model.selection("COMPOUND", "Symmetry_1_7"), 'XAO')
+Export_8 = model.exportToXAO(Part_1_doc, work_dir[0:(len(work_dir))]+'\shaper_jmx8crsu.xao', model.selection("COMPOUND", "Symmetry_1_8"), 'XAO')
+'''
 model.end()
 
 ###
-### GEOM component
+### GEOM component 转为几何文件并分组
 ###
 
 import GEOM
@@ -115,6 +131,7 @@ import SALOMEDS
 
 
 geompy = geomBuilder.New()
+### linux work_dir
 
 (imported, road, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir)-1)]+'/shaper_38aewvdt.xao')
 (imported, Symmetry_1_2, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir)-1)]+'/shaper_psxtkyub.xao')
@@ -124,6 +141,18 @@ geompy = geomBuilder.New()
 (imported, top_beams, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir)-1)]+'/shaper_a4lvhf2x.xao')
 (imported, Symmetry_1_7, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir)-1)]+'/shaper_c503qf1h.xao')
 (imported, bottom_beams, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir)-1)]+'/shaper_jmx8crsu.xao')
+
+### linux work_dir
+'''
+(imported, road, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_38aewvdt.xao')
+(imported, Symmetry_1_2, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_psxtkyub.xao')
+(imported, lateral_beams_1, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_adr_mof0.xao')
+(imported, Symmetry_1_4, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_ho2dmb_g.xao')
+(imported, Symmetry_1_5, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_fiasnwck.xao')
+(imported, top_beams, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_a4lvhf2x.xao')
+(imported, Symmetry_1_7, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_c503qf1h.xao')
+(imported, bottom_beams, [], [], []) = geompy.ImportXAO(work_dir[0:(len(work_dir))]+'\shaper_jmx8crsu.xao')
+'''
 main_beams = geompy.MakeCompound([Symmetry_1_2, Symmetry_1_4, Symmetry_1_7])
 lateral_beams = geompy.MakeCompound([Symmetry_1_5, lateral_beams_1])
 geompy.addToStudy( road, 'road' )
@@ -138,6 +167,7 @@ geompy.addToStudy( main_beams, 'main_beams' )
 geompy.addToStudy( lateral_beams, 'lateral_beams' )
 
 main = geompy.MakeCompound([road, top_beams, bottom_beams, main_beams, lateral_beams])
+#main = geompy.MakeCompound([top_beams, bottom_beams, main_beams, lateral_beams])
 road_1 = geompy.CreateGroup(main, geompy.ShapeType["FACE"])
 road_id_half1 = [i for i in range(5,int(5+(sections*0.5-1)*11+1),11)]
 road_id_half2 = [i for i in range(road_id_half1[-1]+12,int(road_id_half1[-1]+12+(sections*0.5-1)*11+1),11)]
@@ -198,6 +228,23 @@ lateral_beams_id = lateral_beams_id_1 + lateral_beams_id_11 + lateral_beams_id_1
 geompy.UnionIDs(lateral_beams_1, lateral_beams_id)
 geompy.addToStudyInFather( main, lateral_beams_1, 'lateral_beams' )
 
+### left
+left_1 = geompy.CreateGroup(main, geompy.ShapeType["EDGE"])
+left_id = [bottom_beams_id[-1]]
+geompy.UnionIDs(left_1, left_id)
+geompy.addToStudyInFather( main, left_1, 'left' )
+
+### right
+right_1 = geompy.CreateGroup(main, geompy.ShapeType["EDGE"])
+right_id = [bottom_beams_id[int(sections*0.5)-1]]
+geompy.UnionIDs(right_1, right_id)
+geompy.addToStudyInFather(main, right_1, 'right' )
+
+### all_beams
+all_beams_1 = geompy.CreateGroup(main, geompy.ShapeType["EDGE"])
+all_beams_id = main_beams_id + lateral_beams_id + top_beams_id + bottom_beams_id
+geompy.UnionIDs(all_beams_1, all_beams_id)
+geompy.addToStudyInFather(main, all_beams_1, 'all_beams' )
 ###
 ### SMESH component
 ###
@@ -215,49 +262,92 @@ Local_Length_1 = Regular_1D.LocalLength(local_length,None,1e-07)
 Quadrangle_2D = Mesh_1.Quadrangle(algo=smeshBuilder.QUADRANGLE)
 Quadrangle_Parameters_1 = Quadrangle_2D.QuadrangleParameters(smeshBuilder.QUAD_STANDARD,-1,[],[])
 isDone = Mesh_1.Compute()
+
+Mesh_2 = smesh.Mesh(road)
+status = Mesh_2.AddHypothesis(Local_Length_1)
+Regular_1D_1 = Mesh_2.Segment()
+status = Mesh_2.AddHypothesis(Quadrangle_Parameters_1)
+Quadrangle_2D_1 = Mesh_2.Quadrangle(algo=smeshBuilder.QUADRANGLE)
+isDone = Mesh_2.Compute()
+
+all_beams_2 = Mesh_1.GroupOnGeom(all_beams_1,'all_beams',SMESH.EDGE)
+top_beams_2 = Mesh_1.GroupOnGeom(top_beams_1,'top_beams',SMESH.EDGE)
+bottom_beams_2 = Mesh_1.GroupOnGeom(bottom_beams_1,'bottom_beams',SMESH.EDGE)
+main_beams_2 = Mesh_1.GroupOnGeom(main_beams_1,'main_beams',SMESH.EDGE)
 lateral_beams_3 = Mesh_1.GroupOnGeom(lateral_beams_1,'lateral_beams',SMESH.EDGE)
+left_2 = Mesh_1.GroupOnGeom(left_1,'left',SMESH.EDGE)
+right_2 = Mesh_1.GroupOnGeom(right_1,'right',SMESH.EDGE)
+all_beams_3 = Mesh_1.GroupOnGeom(all_beams_1,'all_beams',SMESH.NODE)
+
+top_beams_3 = Mesh_1.GroupOnGeom(top_beams_1,'top_beams',SMESH.NODE)
+bottom_beams_3 = Mesh_1.GroupOnGeom(bottom_beams_1,'bottom_beams',SMESH.NODE)
+main_beams_3 = Mesh_1.GroupOnGeom(main_beams_1,'main_beams',SMESH.NODE)
 lateral_beams_4 = Mesh_1.GroupOnGeom(lateral_beams_1,'lateral_beams',SMESH.NODE)
-
-top_beams_3 = Mesh_1.GroupOnGeom(top_beams_1,'top_beams',SMESH.EDGE)
-top_beams_4 = Mesh_1.GroupOnGeom(top_beams_1,'top_beams',SMESH.NODE)
-
-bottom_beams_3 = Mesh_1.GroupOnGeom(bottom_beams_1,'bottom_beams',SMESH.EDGE)
-bottom_beams_4 = Mesh_1.GroupOnGeom(bottom_beams_1,'bottom_beams',SMESH.NODE)
-
-main_beams_3 = Mesh_1.GroupOnGeom(main_beams_1,'main_beams',SMESH.EDGE)
-main_beams_4 = Mesh_1.GroupOnGeom(main_beams_1,'main_beams',SMESH.NODE)
-
-road_3 = Mesh_1.GroupOnGeom(road_1,'main_beams',SMESH.EDGE)
-road_4 = Mesh_1.GroupOnGeom(road_1,'main_beams',SMESH.NODE)
-road_5 = Mesh_1.GroupOnGeom(road_1,'main_beams',SMESH.FACE)
+left_3 = Mesh_1.GroupOnGeom(left_1,'left',SMESH.NODE)
+right_3 = Mesh_1.GroupOnGeom(right_1,'right',SMESH.NODE)
+road_2 = Mesh_2.GroupOnGeom(road,'road',SMESH.FACE)
+road_3 = Mesh_2.GroupOnGeom(road,'road',SMESH.NODE)
+Compound_Mesh_1 = smesh.Concatenate( [ Mesh_1.GetMesh(), Mesh_2.GetMesh() ], 1, 1, 1e-05, False )
+#[ GrMesh_1_Nodes, GrMesh_1_Edges, GrMesh_1_Faces, top_beams_4, bottom_beams_4, main_beams_4, lateral_beams_5, left_3, right_3, top_beams_5, bottom_beams_5, main_beams_5, lateral_beams_6, left_4, right_4, GrMesh_2_Nodes, GrMesh_2_Edges, GrMesh_2_Faces, road_4, road_5 ] = Compound_Mesh_1.GetGroups()
 
 
 ## Set names of Mesh objects
 smesh.SetName(Regular_1D.GetAlgorithm(), 'Regular_1D')
 smesh.SetName(Quadrangle_2D.GetAlgorithm(), 'Quadrangle_2D')
+smesh.SetName(road_3, 'road_node')
 smesh.SetName(Local_Length_1, 'Local Length_1')
 smesh.SetName(Quadrangle_Parameters_1, 'Quadrangle Parameters_1')
 smesh.SetName(Mesh_1.GetMesh(), 'Mesh_1')
-smesh.SetName(lateral_beams_3, 'lateral_beams')
-smesh.SetName(lateral_beams_4, 'lateral_beams')
-smesh.SetName(top_beams_3, 'top_beams')
-smesh.SetName(top_beams_4, 'top_beams')
-smesh.SetName(bottom_beams_3, 'top_beams')
-smesh.SetName(bottom_beams_4, 'top_beams')
-smesh.SetName(main_beams_3, 'main_beams')
-smesh.SetName(main_beams_4, 'main_beams')
-smesh.SetName(road_3, 'road')
-smesh.SetName(road_4, 'road')
-smesh.SetName(road_5, 'road')
+smesh.SetName(Compound_Mesh_1.GetMesh(), 'Mesh_com')
+smesh.SetName(Mesh_2.GetMesh(), 'Mesh_2')
+smesh.SetName(top_beams_2, 'top_beams_edge')
+smesh.SetName(road_2, 'road_face')
+smesh.SetName(main_beams_2, 'main_beams_edge')
+smesh.SetName(bottom_beams_2, 'bottom_beams_edge')
+smesh.SetName(bottom_beams_3, 'bottom_beams_node')
+smesh.SetName(left_2, 'left')
+smesh.SetName(main_beams_3, 'main_beams_node')
+smesh.SetName(lateral_beams_3, 'lateral_beams_edge')
+smesh.SetName(top_beams_3, 'top_beams_node')
+smesh.SetName(right_2, 'right')
+smesh.SetName(right_3, 'right')
+smesh.SetName(lateral_beams_4, 'lateral_beams_node')
+smesh.SetName(left_3, 'left')
 
 fname = 'Mesh_1.med'
+### linux work_dir
 fdir = os.path.join(work_dir[0:(len(work_dir)-1)],fname)
+### linux work_dir
 #fdir = '/home/export/online3/amd_share/truss_bridge_app/Mesh_1.med'
+#fdir = os.path.join(work_dir[0:(len(work_dir))],fname)
 try:
-  Mesh_1.ExportMED(r'%s' % fdir,auto_groups=0,minor=40,overwrite=1,meshPart=None,autoDimension=1)
+  Compound_Mesh_1.ExportMED(r'%s' % fdir,auto_groups=0,minor=40,overwrite=1,meshPart=None,autoDimension=1)
   pass
 except:
   print('ExportMED() failed. Invalid file name?')
+
+### linux work_dir
+
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_38aewvdt.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_psxtkyub.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_adr_mof0.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_ho2dmb_g.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_fiasnwck.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_a4lvhf2x.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_c503qf1h.xao')
+os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_jmx8crsu.xao')
+
+### linux work_dir
+'''
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_38aewvdt.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_psxtkyub.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_adr_mof0.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_ho2dmb_g.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_fiasnwck.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_a4lvhf2x.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_c503qf1h.xao')
+os.remove(work_dir[0:(len(work_dir))]+'\shaper_jmx8crsu.xao')
+'''
 
 
 if salome.sg.hasDesktop():
