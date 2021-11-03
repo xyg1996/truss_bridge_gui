@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
@@ -54,7 +55,8 @@ class Ui_Workspace(QWidget):
         sizePolicy.setHeightForWidth(self.groupBox_6.sizePolicy().hasHeightForWidth())
         self.groupBox_6.setSizePolicy(sizePolicy)
         self.groupBox_6.setObjectName("groupBox_6")
-        #self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.groupBox_6)
+        self.v_layout_7 = QtWidgets.QVBoxLayout(self.groupBox_6)
+        self.h_layout_7 = QtWidgets.QHBoxLayout(self.groupBox_6)
         #self.verticalLayout_7.setObjectName("verticalLayout_7")
         #self.f_layout = QFormLayout(self.groupBox_6)
         self.grid_layout = QGridLayout(self.groupBox_6)
@@ -85,6 +87,10 @@ class Ui_Workspace(QWidget):
 
         self.pushButton_ok = QtWidgets.QPushButton('确认',self.groupBox_6)
         self.pushButton_reset = QtWidgets.QPushButton('还原',self.groupBox_6)
+        
+        self.h_layout_7.addWidget(self.pushButton_ok)
+        self.h_layout_7.addWidget(self.pushButton_reset)
+
         self.grid_layout.addWidget(self.width_label, 0, 0, 1, 1)
         self.grid_layout.addWidget(self.length_label, 1, 0, 1, 1)
         self.grid_layout.addWidget(self.height_label, 2, 0, 1, 1)
@@ -103,8 +109,11 @@ class Ui_Workspace(QWidget):
         self.grid_layout.addWidget(self.sections_unit, 3, 2, 1, 1)
         self.grid_layout.addWidget(self.spacing_unit, 4, 2, 1, 1)
 
-        self.grid_layout.addWidget(self.pushButton_ok,5,0,1,1)
-        self.grid_layout.addWidget(self.pushButton_reset,5,1,1,1)
+        
+        self.v_layout_7.addLayout(self.grid_layout)
+        self.v_layout_7.addLayout(self.h_layout_7)
+        #self.grid_layout.addWidget(self.pushButton_ok,5,0,1,1)
+        #self.grid_layout.addWidget(self.pushButton_reset,5,2,1,1)
 
         '''
         self.f_layout.addRow(self.width_label, self.width_lineEdit, self.width_unit)
@@ -143,10 +152,14 @@ class Ui_Workspace(QWidget):
         self.pushButton_beam = QtWidgets.QPushButton('应用',self.groupBox)
         self.tabWidget_2 = QtWidgets.QTabWidget()
         #self.tabWidget_2.setTabPosition(QTabWidget.TabPosition.West)
+        
+        self.tab0 = QWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
         self.tab4 = QWidget()
+        
+        self.tabWidget_2.addTab(self.tab0, '底面')
         self.tabWidget_2.addTab(self.tab1, '主梁')
         self.tabWidget_2.addTab(self.tab2, '侧梁')
         self.tabWidget_2.addTab(self.tab3, '顶梁')
@@ -154,6 +167,7 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_2.addWidget(self.tabWidget_2)
         self.verticalLayout_2.addWidget(self.pushButton_beam)
 
+        self.tab0_init()
         self.tab1_init()
         self.tab2_init()
         self.tab3_init()
@@ -184,11 +198,12 @@ class Ui_Workspace(QWidget):
         self.groupBox_2 = QtWidgets.QGroupBox(self.lwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(5)
+        sizePolicy.setVerticalStretch(2)
         sizePolicy.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
         self.groupBox_2.setSizePolicy(sizePolicy)
         self.groupBox_2.setObjectName("groupBox_2")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.groupBox_2)
+        '''self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.groupBox_2)
         self.verticalLayout_8.setObjectName("verticalLayout_8")
         self.scrollArea = QtWidgets.QScrollArea(self.groupBox_2)
         self.scrollArea.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
@@ -198,10 +213,39 @@ class Ui_Workspace(QWidget):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 155, 277))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.verticalLayout_9.setObjectName("verticalLayout_9")'''
+
+        self.grid_layout_2 = QGridLayout(self.groupBox_2)
+        self.road_item = QtWidgets.QLabel('底面',self.groupBox_2)
+        self.beams_item = QtWidgets.QLabel('梁',self.groupBox_2)
+        self.modulus = QtWidgets.QLabel('杨氏模量：',self.groupBox_2)
+        self.poisson = QtWidgets.QLabel('泊松比：',self.groupBox_2)
+        self.rho = QtWidgets.QLabel('密度：',self.groupBox_2)
+
+        self.modulus_value_beams = QtWidgets.QLineEdit('2e11',self.groupBox_2)
+        self.modulus_value_road = QtWidgets.QLineEdit('2.5e10',self.groupBox_2)
+        self.poisson_value_beams = QtWidgets.QLineEdit('0.3',self.groupBox_2)
+        self.poisson_value_road = QtWidgets.QLineEdit('0.2',self.groupBox_2)
+        self.rho_value_beams = QtWidgets.QLineEdit('7850',self.groupBox_2)
+        self.rho_value_road = QtWidgets.QLineEdit('2300',self.groupBox_2)
+
+        
+        self.grid_layout_2.addWidget(self.road_item, 0, 1, 1, 1)
+        self.grid_layout_2.addWidget(self.beams_item, 0, 2, 1, 1)
+
+        self.grid_layout_2.addWidget(self.modulus, 1, 0, 1, 1)
+        self.grid_layout_2.addWidget(self.poisson, 2, 0, 1, 1)
+        self.grid_layout_2.addWidget(self.rho, 3, 0, 1, 1)
+        self.grid_layout_2.addWidget(self.modulus_value_road, 1, 1, 1, 1)
+        self.grid_layout_2.addWidget(self.poisson_value_road, 2, 1, 1, 1)
+        self.grid_layout_2.addWidget(self.rho_value_road, 3, 1, 1, 1)
+
+        self.grid_layout_2.addWidget(self.modulus_value_beams, 1, 2, 1, 1)
+        self.grid_layout_2.addWidget(self.poisson_value_beams, 2, 2, 1, 1)
+        self.grid_layout_2.addWidget(self.rho_value_beams, 3, 2, 1, 1)
 
         #增加展示方式下拉框
-        self.represent_combo = QtWidgets.QComboBox()
+        '''self.represent_combo = QtWidgets.QComboBox()
         self.represent_combo.addItem('3D Glyphs')
         self.represent_combo.addItem('Feature Edges')
         self.represent_combo.addItem('Outline')
@@ -211,20 +255,21 @@ class Ui_Workspace(QWidget):
         self.represent_combo.addItem('Surface With Edges')
         self.represent_combo.addItem('Volume')
         self.represent_combo.addItem('Wireframe')
-        self.verticalLayout_9.addWidget(self.represent_combo)
+        self.verticalLayout_9.addWidget(self.represent_combo)'''
 
 
-        self.formLayout = QtWidgets.QFormLayout()
+        '''self.formLayout = QtWidgets.QFormLayout()
         self.formLayout.setObjectName("formLayout")
         self.verticalLayout_9.addLayout(self.formLayout)
-        self.verticalLayout_9.addStretch()
+        self.verticalLayout_9.addStretch()'''
         #增加应用按钮
         self.apply = QtWidgets.QPushButton()
         self.apply.setText('应用')
-        self.verticalLayout_9.addWidget(self.apply)
+        self.verticalLayout_8.addLayout(self.grid_layout_2)
+        self.verticalLayout_8.addWidget(self.apply)
         
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout_8.addWidget(self.scrollArea)
+        #self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        #self.verticalLayout_8.addWidget(self.scrollArea)
         self.verticalLayout.addWidget(self.groupBox_2)
         self.groupBox_3 = QtWidgets.QGroupBox(self.lwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -233,14 +278,32 @@ class Ui_Workspace(QWidget):
         sizePolicy.setHeightForWidth(self.groupBox_3.sizePolicy().hasHeightForWidth())
         self.groupBox_3.setSizePolicy(sizePolicy)
         self.groupBox_3.setObjectName("groupBox_3")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox_3)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        #self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox_3)
+        #self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.h_layout =  QtWidgets.QHBoxLayout()
+        self.v_layout = QtWidgets.QVBoxLayout(self.groupBox_3)
+
+        self.h_layout_test =  QtWidgets.QHBoxLayout()
+
+        self.static_button = QRadioButton('静力学分析', self.groupBox_3)
+        self.modes_button = QRadioButton('模态分析', self.groupBox_3)
+        self.h_layout.addWidget(self.static_button)   
+        self.h_layout.addWidget(self.modes_button)  
+        
         self.pushButton_4 = QtWidgets.QPushButton(self.groupBox_3)
+        self.pushButton_test = QtWidgets.QPushButton(self.groupBox_3)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace/检查 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton_4.setIcon(icon5)
+        #self.pushButton_4.setIcon(icon5)
         self.pushButton_4.setObjectName("pushButton_4")
-        self.verticalLayout_3.addWidget(self.pushButton_4)
+
+        self.h_layout_test.addWidget(self.pushButton_4)
+        self.h_layout_test.addWidget(self.pushButton_test)
+
+        self.v_layout.addLayout(self.h_layout)
+        #self.v_layout.addWidget(self.pushButton_4)
+        self.v_layout.addLayout(self.h_layout_test)
+        #self.verticalLayout_3.addWidget(self.pushButton_4)
         self.verticalLayout.addWidget(self.groupBox_3)
         # self.lwidget.setWidget(self.dockWidgetContents)
         # self.splitter = QtWidgets.QSplitter(self.splitter_2)
@@ -399,7 +462,7 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_10.addWidget(self.lwidget_2)
         icon17 = QtGui.QIcon()
         icon17.addPixmap(QtGui.QPixmap("/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace/计算机 算数.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.tabWidget.addTab(self.tab_2, icon17, "")
+        #self.tabWidget.addTab(self.tab_2, icon17, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.tab_3)
@@ -415,44 +478,69 @@ class Ui_Workspace(QWidget):
         self.horizontalLayout.addWidget(self.tabWidget)
         self.retranslateUi(Form)
         self.tabWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(Form)
+        
+    def tab0_init(self):
+        self.g_layout = QGridLayout(self.tab0)
+        self.pic_label = QLabel(self.tab0)
+        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/road.png'))  
+        #self.pic_label.resize(100,100)
+        #self.pic_label.setScaledContents(True)
+        self.tab0_H = QtWidgets.QLabel('E:',self.tab0)
+        self.tab0_H_value = QtWidgets.QLineEdit('0.1',self.tab0)
+        self.tab0_H_unit = QtWidgets.QLabel('m',self.tab0)
+        self.g_layout.addWidget(self.tab0_H,0,0,1,1)
+        self.g_layout.addWidget(self.tab0_H_value,0,1,1,1)
+        self.g_layout.addWidget(self.tab0_H_unit,0,2,1,1)
+        self.g_layout.addWidget(self.pic_label,1,1,1,1)
+
 
     def tab1_init(self):
         self.g_layout = QGridLayout(self.tab1)
+        self.pic_label = QLabel(self.tab0)
+        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
         self.tab1_H = QtWidgets.QLabel('H:',self.tab1)
         self.tab1_H_value = QtWidgets.QLineEdit('0.1',self.tab1)
         self.tab1_H_unit = QtWidgets.QLabel('m',self.tab1)
         self.g_layout.addWidget(self.tab1_H,0,0,1,1)
         self.g_layout.addWidget(self.tab1_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab1_H_unit,0,2,1,1)
+        self.g_layout.addWidget(self.pic_label,1,1,1,1)
 
     def tab2_init(self):
         self.g_layout = QGridLayout(self.tab2)
+        self.pic_label = QLabel(self.tab0)
+        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
         self.tab2_H = QtWidgets.QLabel('H:',self.tab2)
         self.tab2_H_value = QtWidgets.QLineEdit('0.1',self.tab2)
         self.tab2_H_unit =  QtWidgets.QLabel('m',self.tab2)
         self.g_layout.addWidget(self.tab2_H,0,0,1,1)
         self.g_layout.addWidget(self.tab2_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab2_H_unit,0,2,1,1)
+        self.g_layout.addWidget(self.pic_label,1,1,1,1)
 
     def tab3_init(self):
         self.g_layout = QGridLayout(self.tab3)
+        self.pic_label = QLabel(self.tab0)
+        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
         self.tab3_H = QtWidgets.QLabel('H:',self.tab3)
         self.tab3_H_value = QtWidgets.QLineEdit('0.1',self.tab3)
         self.tab3_H_unit = QtWidgets.QLabel('m',self.tab3)
         self.g_layout.addWidget(self.tab3_H,0,0,1,1)
         self.g_layout.addWidget(self.tab3_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab3_H_unit,0,2,1,1)
+        self.g_layout.addWidget(self.pic_label,1,1,1,1)
 
     def tab4_init(self):
         self.g_layout = QGridLayout(self.tab4)
+        self.pic_label = QLabel(self.tab0)
+        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
         self.tab4_H = QtWidgets.QLabel('H:',self.tab4)
         self.tab4_H_value = QtWidgets.QLineEdit('0.1',self.tab4)
         self.tab4_H_unit = QtWidgets.QLabel('m',self.tab4)
         self.g_layout.addWidget(self.tab4_H,0,0,1,1)
         self.g_layout.addWidget(self.tab4_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab4_H_unit,0,2,1,1)
-
+        self.g_layout.addWidget(self.pic_label,1,1,1,1)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -465,11 +553,11 @@ class Ui_Workspace(QWidget):
         #self.pushButton.setText(_translate("Form", "Salome 网格转化 "))
         #self.pushButton_2.setText(_translate("Form", "OpenFoam导入网格"))
         #self.pushButton_3.setText(_translate("Form", "OpenFoam生成网格"))
-        self.groupBox_2.setTitle(_translate("Form", "网格显示"))
-        self.groupBox_3.setTitle(_translate("Form", "网格评估"))
-        self.pushButton_4.setText(_translate("Form", "网格检查"))
+        self.groupBox_2.setTitle(_translate("Form", "材料属性"))
+        self.groupBox_3.setTitle(_translate("Form", "研究类型"))
+        self.pushButton_4.setText(_translate("Form", "提交计算"))
         # self.dockWidget_2.setWindowTitle(_translate("Form", "Log"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Form", "前处理"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Form", "设置"))
         self.groupBox_4.setTitle(_translate("Form", "参数设置"))
         self.pushButton_5.setText(_translate("Form", "材料设置"))
         self.pushButton_6.setText(_translate("Form", "模型选择"))
