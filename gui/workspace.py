@@ -243,15 +243,15 @@ class Workspace(QWidget):
         # 还原按钮
         self.work_space_tool.ui.pushButton_reset.clicked.connect(self.reset)
         # 打开open foam文件
-        self.work_space_tool.ui.pushButton_2.clicked.connect(lambda:self.open_openfoam_file(self.workingdirectory))
+        #self.work_space_tool.ui.pushButton_2.clicked.connect(lambda:self.open_openfoam_file(self.workingdirectory))
         # 设置工程目录
         #self.work_space_tool.ui.pushButton_15.clicked.connect(self.create_dir)
         # 网格检查
         self.work_space_tool.ui.pushButton_4.clicked.connect(self.show_mesh_check_res)
         # OpenFoam生成网格
-        self.work_space_tool.ui.pushButton_3.clicked.connect(self.check_is_working_dir_gen_mesh)
+        #self.work_space_tool.ui.pushButton_3.clicked.connect(self.check_is_working_dir_gen_mesh)
         # Salome 网格转化 
-        self.work_space_tool.ui.pushButton.clicked.connect(self.check_is_working_dir_mesh_tran)
+        #self.work_space_tool.ui.pushButton.clicked.connect(self.check_is_working_dir_mesh_tran)
         # 网格显示的应用
         self.work_space_tool.ui.apply.clicked.connect(lambda:self.change_mesh_display(self.res))
         # 开始计算
@@ -829,8 +829,8 @@ class Workspace(QWidget):
                     res_MeshRegions.append(items)
             res.MeshRegions = res_MeshRegions
             self.ren_view = pvs.GetRenderView()
-            represent_type = self.work_space_tool.ui.represent_combo.currentText()
-            self.currentdisplay.SetRepresentationType(represent_type)
+            #represent_type = self.work_space_tool.ui.represent_combo.currentText()
+            #self.currentdisplay.SetRepresentationType(represent_type)
             self.ren_view.Update()
             # The following two lines insure that the view is refreshed
             self.pv_splitter.setVisible(False)
@@ -844,7 +844,7 @@ class Workspace(QWidget):
         '''
         if self.workingdirectory:
             self.work_space_tool.MeshtranDialog.show()
-            self.work_space_tool.mesh_tran.pushButton_3.clicked.connect(self.work_space_tool.MeshtranDialog.reject)
+            #self.work_space_tool.mesh_tran.pushButton_3.clicked.connect(self.work_space_tool.MeshtranDialog.reject)
         else:
             QtWidgets.QMessageBox.information(self, '错误', '请先设置工程目录!')
 
@@ -925,9 +925,9 @@ class Workspace(QWidget):
         self.process.finished.connect(lambda:self.mesh_chack_enable(True))
 
     def mesh_chack_enable(self,bool):
-        self.work_space_tool.ui.pushButton.setEnabled(bool)
-        self.work_space_tool.ui.pushButton_2.setEnabled(bool)
-        self.work_space_tool.ui.pushButton_3.setEnabled(bool)
+        #self.work_space_tool.ui.pushButton.setEnabled(bool)
+        #self.work_space_tool.ui.pushButton_2.setEnabled(bool)
+        #self.work_space_tool.ui.pushButton_3.setEnabled(bool)
         self.work_space_tool.ui.pushButton_4.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_15.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_16.setEnabled(bool)
@@ -1069,8 +1069,8 @@ class Workspace(QWidget):
         self.work_space_tool.mesh_tran = Ui_Mesh_tran()
         self.work_space_tool.mesh_tran.setupUi(self.work_space_tool.MeshtranDialog)
         self.work_space_tool.MeshtranDialog.setWindowModality(Qt.ApplicationModal)
-        self.work_space_tool.mesh_tran.pushButton.clicked.connect(self.return_to_smash)
-        self.work_space_tool.mesh_tran.pushButton_2.clicked.connect(lambda:self.transfer_mash(self.workingdirectory))
+        #self.work_space_tool.mesh_tran.pushButton.clicked.connect(self.return_to_smash)
+        #self.work_space_tool.mesh_tran.pushButton_2.clicked.connect(lambda:self.transfer_mash(self.workingdirectory))
         self.work_space_tool.MeshtranDialog.setWindowModality(Qt.ApplicationModal)
 
         self.work_space_tool.MeshgenerateDialog = QDialog()

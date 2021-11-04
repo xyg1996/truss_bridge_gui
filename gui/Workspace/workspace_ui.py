@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
@@ -20,7 +20,7 @@ class Ui_Workspace(QWidget):
         self.setupUi
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(235, 826)
+        Form.resize(100, 500)
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.tabWidget = QtWidgets.QTabWidget(Form)
@@ -48,6 +48,9 @@ class Ui_Workspace(QWidget):
         # self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.lwidget)
         self.verticalLayout.setObjectName("verticalLayout")
+        ###
+        ### 总体设计
+        ###
         self.groupBox_6 = QtWidgets.QGroupBox(self.lwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -55,39 +58,39 @@ class Ui_Workspace(QWidget):
         sizePolicy.setHeightForWidth(self.groupBox_6.sizePolicy().hasHeightForWidth())
         self.groupBox_6.setSizePolicy(sizePolicy)
         self.groupBox_6.setObjectName("groupBox_6")
-        self.v_layout_7 = QtWidgets.QVBoxLayout(self.groupBox_6)
-        self.h_layout_7 = QtWidgets.QHBoxLayout(self.groupBox_6)
         #self.verticalLayout_7.setObjectName("verticalLayout_7")
-        #self.f_layout = QFormLayout(self.groupBox_6)
-        self.grid_layout = QGridLayout(self.groupBox_6)
+        #self.f_layout = QFormLayout(self.groupBox_6) 
+        self.v_layout_7 = QtWidgets.QVBoxLayout(self.groupBox_6)
+        self.h_layout_7 = QtWidgets.QHBoxLayout()
+        self.grid_layout = QGridLayout()
         # Button
-        self.width_label = QtWidgets.QLabel('宽度:',self.groupBox_6)
-        self.length_label = QtWidgets.QLabel('长度:',self.groupBox_6)
-        self.height_label = QtWidgets.QLabel('高度:',self.groupBox_6)
-        self.sections_label = QtWidgets.QLabel('桁架节点数:',self.groupBox_6)
-        self.spacing_label = QtWidgets.QLabel('间距:',self.groupBox_6)
+        self.width_label = QtWidgets.QLabel('宽度:')
+        self.length_label = QtWidgets.QLabel('长度:')
+        self.height_label = QtWidgets.QLabel('高度:')
+        self.sections_label = QtWidgets.QLabel('桁架节点数:')
+        self.spacing_label = QtWidgets.QLabel('间距:')
         #self.label.setObjectName("label")
         #self.verticalLayout_7.addWidget(self.label)
-        self.width_lineEdit = QtWidgets.QLineEdit('7',self.groupBox_6)
-        self.length_lineEdit = QtWidgets.QLineEdit('40',self.groupBox_6)
-        self.height_lineEdit = QtWidgets.QLineEdit('5',self.groupBox_6)
-        self.sections_lineEdit = QtWidgets.QLineEdit('8',self.groupBox_6)
-        self.spacing_lineEdit = QtWidgets.QLineEdit('5',self.groupBox_6)
+        self.width_lineEdit = QtWidgets.QLineEdit('7')
+        self.length_lineEdit = QtWidgets.QLineEdit('40')
+        self.height_lineEdit = QtWidgets.QLineEdit('5')
+        self.sections_lineEdit = QtWidgets.QLineEdit('8')
+        self.spacing_lineEdit = QtWidgets.QLineEdit('5')
 
-        self.width_unit = QtWidgets.QLabel('m',self.groupBox_6)
-        self.length_unit = QtWidgets.QLabel('m',self.groupBox_6)
-        self.height_unit = QtWidgets.QLabel('m',self.groupBox_6)
-        self.sections_unit = QtWidgets.QLabel('',self.groupBox_6)
-        self.spacing_unit = QtWidgets.QLabel('m',self.groupBox_6)
+        self.width_unit = QtWidgets.QLabel('m')
+        self.length_unit = QtWidgets.QLabel('m')
+        self.height_unit = QtWidgets.QLabel('m')
+        self.sections_unit = QtWidgets.QLabel('')
+        self.spacing_unit = QtWidgets.QLabel('m')
 
         self.spacing_lineEdit.setEnabled(False)
         #self.width = int(self.width_lineEdit.text())
         #print(self.width)
 
 
-        self.pushButton_ok = QtWidgets.QPushButton('确认',self.groupBox_6)
-        self.pushButton_reset = QtWidgets.QPushButton('还原',self.groupBox_6)
-        
+        self.pushButton_ok = QtWidgets.QPushButton('确认')
+        self.pushButton_reset = QtWidgets.QPushButton('还原')
+
         self.h_layout_7.addWidget(self.pushButton_ok)
         self.h_layout_7.addWidget(self.pushButton_reset)
 
@@ -138,11 +141,15 @@ class Ui_Workspace(QWidget):
         #self.pushButton_16.setIcon(icon1)
         #self.pushButton_16.setObjectName("pushButton_16")
         #self.verticalLayout_7.addWidget(self.pushButton_16)
-        
+
+        ###
+        ### 单元属性
+        ###
+               
         self.groupBox = QtWidgets.QGroupBox(self.lwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(5)
+        sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
         self.groupBox.setSizePolicy(sizePolicy)
         self.groupBox.setObjectName("groupBox")
@@ -167,6 +174,8 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_2.addWidget(self.tabWidget_2)
         self.verticalLayout_2.addWidget(self.pushButton_beam)
 
+        #self.pic_path =  '/amd_share/online1/install/truss_bridge/SALOME-9.4.0-CO7-SRC/asterstudy/gui/Workspace'
+        self.pic_path = '/usr/sw-cluster/simforge/code_aster_14.6/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace'
         self.tab0_init()
         self.tab1_init()
         self.tab2_init()
@@ -193,12 +202,14 @@ class Ui_Workspace(QWidget):
         #self.verticalLayout_2.addWidget(self.pushButton_3)
         self.verticalLayout.addWidget(self.groupBox)
 
-
+        ###
+        ### 材料属性
+        ###
 
         self.groupBox_2 = QtWidgets.QGroupBox(self.lwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(2)
+        sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
         self.groupBox_2.setSizePolicy(sizePolicy)
         self.groupBox_2.setObjectName("groupBox_2")
@@ -215,7 +226,7 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_9.setObjectName("verticalLayout_9")'''
 
-        self.grid_layout_2 = QGridLayout(self.groupBox_2)
+        self.grid_layout_2 = QGridLayout()
         self.road_item = QtWidgets.QLabel('底面',self.groupBox_2)
         self.beams_item = QtWidgets.QLabel('梁',self.groupBox_2)
         self.modulus = QtWidgets.QLabel('杨氏模量：',self.groupBox_2)
@@ -287,11 +298,12 @@ class Ui_Workspace(QWidget):
 
         self.static_button = QRadioButton('静力学分析', self.groupBox_3)
         self.modes_button = QRadioButton('模态分析', self.groupBox_3)
+        self.static_button.setChecked(True)
         self.h_layout.addWidget(self.static_button)   
         self.h_layout.addWidget(self.modes_button)  
         
         self.pushButton_4 = QtWidgets.QPushButton(self.groupBox_3)
-        self.pushButton_test = QtWidgets.QPushButton(self.groupBox_3)
+        self.pushButton_test = QtWidgets.QPushButton('终止计算',self.groupBox_3)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace/检查 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         #self.pushButton_4.setIcon(icon5)
@@ -462,7 +474,7 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_10.addWidget(self.lwidget_2)
         icon17 = QtGui.QIcon()
         icon17.addPixmap(QtGui.QPixmap("/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace/计算机 算数.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        #self.tabWidget.addTab(self.tab_2, icon17, "")
+        self.tabWidget.addTab(self.tab_2, icon17, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.tab_3)
@@ -481,35 +493,50 @@ class Ui_Workspace(QWidget):
         
     def tab0_init(self):
         self.g_layout = QGridLayout(self.tab0)
-        self.pic_label = QLabel(self.tab0)
-        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/road.png'))  
-        #self.pic_label.resize(100,100)
-        #self.pic_label.setScaledContents(True)
+        pic_label = QLabel(self.tab0)
+        pic_name = 'road.png'
+        full_path = self.pic_path + '/' + pic_name
+        pic_label.setPixmap(QPixmap(full_path)) 
+        pic_label.setScaledContents(True)
+        pic_label.setMaximumSize(200,100)
         self.tab0_H = QtWidgets.QLabel('E:',self.tab0)
         self.tab0_H_value = QtWidgets.QLineEdit('0.1',self.tab0)
         self.tab0_H_unit = QtWidgets.QLabel('m',self.tab0)
         self.g_layout.addWidget(self.tab0_H,0,0,1,1)
         self.g_layout.addWidget(self.tab0_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab0_H_unit,0,2,1,1)
-        self.g_layout.addWidget(self.pic_label,1,1,1,1)
+        self.g_layout.addWidget(pic_label,1,1,1,1)
 
 
     def tab1_init(self):
+        #self.v_layout = QVBoxLayout(self.tab1)
         self.g_layout = QGridLayout(self.tab1)
-        self.pic_label = QLabel(self.tab0)
-        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        pic_label = QLabel(self.tab0)
+        pic_name = 'cross_section.png'
+        full_path = self.pic_path + '/' + pic_name
+        #pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        pic_label.setPixmap(QPixmap(full_path))
+        pic_label.setScaledContents(True)
+        pic_label.setMaximumSize(100,100)
         self.tab1_H = QtWidgets.QLabel('H:',self.tab1)
         self.tab1_H_value = QtWidgets.QLineEdit('0.1',self.tab1)
         self.tab1_H_unit = QtWidgets.QLabel('m',self.tab1)
         self.g_layout.addWidget(self.tab1_H,0,0,1,1)
         self.g_layout.addWidget(self.tab1_H_value,0,1,1,1)
         self.g_layout.addWidget(self.tab1_H_unit,0,2,1,1)
-        self.g_layout.addWidget(self.pic_label,1,1,1,1)
+        #self.v_layout.addLayout(self.g_layout)
+        #self.v_layout.addWidget(self.pic_label)
+        self.g_layout.addWidget(pic_label,1,1,1,1)
 
     def tab2_init(self):
         self.g_layout = QGridLayout(self.tab2)
-        self.pic_label = QLabel(self.tab0)
-        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        self.pic_label = QLabel(self.tab2)
+        #self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        pic_name = 'cross_section.png'
+        full_path = self.pic_path + '/' + pic_name
+        self.pic_label.setPixmap(QPixmap(full_path)) 
+        self.pic_label.setScaledContents(True)
+        self.pic_label.setMaximumSize(100,100)
         self.tab2_H = QtWidgets.QLabel('H:',self.tab2)
         self.tab2_H_value = QtWidgets.QLineEdit('0.1',self.tab2)
         self.tab2_H_unit =  QtWidgets.QLabel('m',self.tab2)
@@ -521,7 +548,12 @@ class Ui_Workspace(QWidget):
     def tab3_init(self):
         self.g_layout = QGridLayout(self.tab3)
         self.pic_label = QLabel(self.tab0)
-        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        #self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        pic_name = 'cross_section.png'
+        full_path = self.pic_path + '/' + pic_name
+        self.pic_label.setPixmap(QPixmap(full_path)) 
+        self.pic_label.setScaledContents(True)
+        self.pic_label.setMaximumSize(100,100)
         self.tab3_H = QtWidgets.QLabel('H:',self.tab3)
         self.tab3_H_value = QtWidgets.QLineEdit('0.1',self.tab3)
         self.tab3_H_unit = QtWidgets.QLabel('m',self.tab3)
@@ -532,8 +564,13 @@ class Ui_Workspace(QWidget):
 
     def tab4_init(self):
         self.g_layout = QGridLayout(self.tab4)
-        self.pic_label = QLabel(self.tab0)
-        self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        self.pic_label = QLabel(self.tab4)
+        #self.pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
+        pic_name = 'cross_section.png'
+        full_path = self.pic_path + '/' + pic_name
+        self.pic_label.setPixmap(QPixmap(full_path)) 
+        self.pic_label.setScaledContents(True)
+        self.pic_label.setMaximumSize(100,100)
         self.tab4_H = QtWidgets.QLabel('H:',self.tab4)
         self.tab4_H_value = QtWidgets.QLineEdit('0.1',self.tab4)
         self.tab4_H_unit = QtWidgets.QLabel('m',self.tab4)
