@@ -165,8 +165,11 @@ class Workspace(QWidget):
         # pimplefoam_root 是default文件alternative文件的上层文件夹，其中文件是用来配置openfoam的
         #self.pimplefoam_root = '/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy'
         self.pimplefoam_root ='/usr/salome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/'
-        self.curr_dir = os.popen('echo `pwd`').read()[0:-1]
-        self.work_dir = '/home/export/online3/amd_share/truss_bridge_app'
+        #self.curr_dir = os.popen('echo `pwd`').read()[0:-1]
+        self.curr_dir = '/amd_share/online1/install/truss_bridge/code_aster_dir'
+        self.curr_dir_2 = '/amd_share/online1/install/truss_bridge/SALOME-9.4.0-CO7-SRC/asterstudy/gui'
+        self.work_dir = '/amd_share/online1/install/truss_bridge/script'
+        #self.work_dir = '/home/export/online3/amd_share/truss_bridge_app'
         print(self.work_dir)
         # 主窗口为横向布局，并添加了分割器
         self.horizontalLayout = QtWidgets.QHBoxLayout(self) #实例化横向布局管理器
@@ -242,18 +245,23 @@ class Workspace(QWidget):
         self.work_space_tool.ui.pushButton_ok.clicked.connect(self.cal_spacing)
         # 还原按钮
         self.work_space_tool.ui.pushButton_reset.clicked.connect(self.reset)
+         # 单元属性应用按钮
+        self.work_space_tool.ui.pushButton_beam.clicked.connect(self.change_element_pro)
+        self.work_space_tool.ui.apply.clicked.connect(self.change_element_pro)
+        # 提交计算
+        self.work_space_tool.ui.pushButton_4.clicked.connect(self.submit)
         # 打开open foam文件
         #self.work_space_tool.ui.pushButton_2.clicked.connect(lambda:self.open_openfoam_file(self.workingdirectory))
         # 设置工程目录
         #self.work_space_tool.ui.pushButton_15.clicked.connect(self.create_dir)
         # 网格检查
-        self.work_space_tool.ui.pushButton_4.clicked.connect(self.show_mesh_check_res)
+        #self.work_space_tool.ui.pushButton_4.clicked.connect(self.show_mesh_check_res)
         # OpenFoam生成网格
         #self.work_space_tool.ui.pushButton_3.clicked.connect(self.check_is_working_dir_gen_mesh)
         # Salome 网格转化 
         #self.work_space_tool.ui.pushButton.clicked.connect(self.check_is_working_dir_mesh_tran)
         # 网格显示的应用
-        self.work_space_tool.ui.apply.clicked.connect(lambda:self.change_mesh_display(self.res))
+        #self.work_space_tool.ui.apply.clicked.connect(lambda:self.change_mesh_display(self.res))
         # 开始计算
         #self.work_space_tool.ui.pushButton_11.clicked.connect(self.disable_some_buttons)
         self.work_space_tool.ui.pushButton_12.clicked.connect(self.enable_some_buttons)
@@ -270,6 +278,97 @@ class Workspace(QWidget):
         self.work_space_tool.ui.pushButton_13.clicked.connect(self.continue_to_calculate)
         
         self.openfoam_error.connect(self.show_openfoam_error)
+
+    def create_static_comm(self,material1,material2,element,curr_dir):
+        #file = work_dir + '/static.comm'
+        fname = 'static.comm'
+        file = os.path.join(curr_dir,fname)
+        print('file:',file)
+        data = ''
+        i = 1
+        with open(file,'r+') as f:
+            for line in f.readlines():
+                if(line.find('steel') == 0):
+                    #line = 'width = %s' % (str(self.width1)) + '\n'
+                    line = 'steel = DEFI_MATERIAU(ELAS=_F(E=%s, NU=%s, RHO=%s))' % (material1[0],material1[1],material1[2])  + '\n'
+                if(line.find('concrete') == 0):
+                    line = 'concrete = DEFI_MATERIAU(ELAS=_F(E=%s, NU=%s, RHO=%s))' % (material2[0],material2[1],material2[2])  + '\n'
+                '''print(i,len(line))
+                if(line.find('CARA',4) == 0):
+                    print('ok')'''
+                if i == 23:
+                    line = '    COQUE=_F(EPAIS=%s, GROUP_MA=(\'road\', )),' % (element[0]) + '\n'
+                if i == 30:
+                    line = '            VALE=(%s, )' % (element[1]) + '\n'
+                if i == 35:
+                    line = '            VALE=(%s, )' % (element[2]) + '\n'
+                if i == 40:
+                    line = '            VALE=(%s, )' % (element[3]) + '\n'
+                if i == 45:
+                    line = '            VALE=(%s, )' % (element[4]) + '\n'
+
+                i+=1
+                data += line
+        f.close
+        #print(data)
+        with open(file,'r+') as f:
+            f.writelines(data)
+        f.close
+        
+    def change_element_pro(self):
+        #from .create_static_comm import create_static_comm
+        #fname = 'static.comm' #网格文件
+        #fdir_curr = os.path.join(self.curr_dir,fname)
+        element0 = self.work_space_tool.ui.tab0_H_value.text()
+        element1 = self.work_space_tool.ui.tab1_H_value.text()
+        element2 = self.work_space_tool.ui.tab2_H_value.text()
+        element3 = self.work_space_tool.ui.tab3_H_value.text()
+        element4 = self.work_space_tool.ui.tab4_H_value.text()
+        self.element = [element0,element1,element2,element3,element4]
+
+        material11 = self.work_space_tool.ui.modulus_value_beams.text()
+        material12 = self.work_space_tool.ui.poisson_value_beams.text()
+        material13 = self.work_space_tool.ui.rho_value_beams.text()
+        self.material1 = [material11,material12,material13]
+
+        material21 = self.work_space_tool.ui.modulus_value_road.text()
+        material22 = self.work_space_tool.ui.poisson_value_road.text()
+        material23 = self.work_space_tool.ui.rho_value_road.text()
+        self.material2 = [material21,material22,material23]
+        try:
+            self.create_static_comm(self.material1,self.material2,self.element,self.curr_dir)
+            #material1=[2e11,0.3,7850]
+            #material2=[2.5e10,0.2,2500]
+            #element = [0.1,0.2,0.3,0.4,0.5]
+            print('curr_dir:',self.curr_dir_2)
+            #self.create_static_comm(material1,material2,element,self.curr_dir_2)
+            self.process.start('echo 写入comm文件中')
+
+        except:
+            self.process.start('echo 写入comm文件失败')
+        
+    def submit(self):
+        if self.work_space_tool.ui.modes_button.isChecked():
+            pass
+        else:
+            self.disable_some_buttons()
+            self.work_space_tool.ui.pushButton_4.setEnabled(False)
+            #cmd = '/amd_share/online1/install/code_aster_14.6/14.6/bin/as_run '
+            cmd = 'sh '
+            cmd += self.curr_dir
+            cmd += '/submit.sh'
+            print('cmd:',cmd)
+            try:
+                self.process.start('echo 已提交计算')
+                QApplication.processEvents()
+                self.process.start(cmd)
+                #self.curr_dir = os.popen('echo `pwd`').read()[0:-1]
+                #os.popen(cmd)
+                self.work_space_tool.ui.pushButton_break.setEnabled(True)
+                self.enable_some_buttons()
+            except:
+                self.process.start('echo 提交计算失败')
+    
     def check_parameter_isnum(self,num):
         try:
             num = float(num)
@@ -316,7 +415,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.spacing_lineEdit.setText(str(self.spacing))
 
         fname = 'Mesh_1.med' #网格文件
-        script_name = 'create_geo_mesh.py' #参数化脚本
+        script_name = 'create_geo_mesh_new.py' #参数化脚本
         fdir = os.path.join(self.work_dir,fname)
         fdir_curr = os.path.join(self.curr_dir,fname)
         script_dir = os.path.join(self.work_dir,script_name)
@@ -325,9 +424,12 @@ class Workspace(QWidget):
         time.sleep(0.25)
         try:
             if(self.check_iseven(self.sections)):
-                exec(open(script_dir).read())
+                exec(open(script_dir,"rb").read())
+                self.process.start('echo 运行参数化建模脚本中')
         except:
             print("脚本错误!")
+            self.process.start('echo 脚本错误！')
+        #exec(open('/amd_share/online1/install/truss_bridge/script/create_geo_mesh.py').read())
         self.show_mesh_1(fdir_curr)
 
     def reset(self):
@@ -352,7 +454,6 @@ class Workspace(QWidget):
                 self.process.waitForFinished()
         except Exception as e:
             print(e)
-            pass
         self.process.start('echo 开始显示网格...')
         self.process.waitForFinished()
         #self.show_mesh_display_list(boundary_file)
@@ -430,6 +531,13 @@ class Workspace(QWidget):
         '''
             让一些按钮生效或失效，以防用户误操作
         '''
+        self.work_space_tool.ui.pushButton_ok.setEnabled(True)
+        self.work_space_tool.ui.pushButton_reset.setEnabled(True)
+        self.work_space_tool.ui.pushButton_beam.setEnabled(True)
+        self.work_space_tool.ui.apply.setEnabled(True)
+        self.work_space_tool.ui.static_button.setEnabled(True)
+        self.work_space_tool.ui.modes_button.setEnabled(True)
+        '''
         self.work_space_tool.ui.pushButton_5.setEnabled(True)
         self.work_space_tool.ui.pushButton_6.setEnabled(True)
         self.work_space_tool.ui.pushButton_7.setEnabled(True)
@@ -442,11 +550,19 @@ class Workspace(QWidget):
         #self.work_space_tool.computing_control.groupBox.setEnabled(True)
         self.work_space_tool.ui.pushButton_12.setEnabled(False)
         self.work_space_tool.ui.tabWidget.setTabEnabled(0,True)
-        self.work_space_tool.ui.tabWidget.setTabEnabled(2,True)
+        self.work_space_tool.ui.tabWidget.setTabEnabled(2,True)'''
 
     def disable_some_buttons(self):
         '''
             让一些按钮生效或失效，以防用户误操作
+        '''
+
+        self.work_space_tool.ui.pushButton_ok.setEnabled(False)
+        self.work_space_tool.ui.pushButton_reset.setEnabled(False)
+        self.work_space_tool.ui.pushButton_beam.setEnabled(False)
+        self.work_space_tool.ui.apply.setEnabled(False)
+        self.work_space_tool.ui.static_button.setEnabled(False)
+        self.work_space_tool.ui.modes_button.setEnabled(False)
         '''
         self.work_space_tool.ui.pushButton_5.setEnabled(False)
         self.work_space_tool.ui.pushButton_6.setEnabled(False)
@@ -461,6 +577,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.tabWidget.setTabEnabled(0,False)
         self.work_space_tool.ui.tabWidget.setTabEnabled(2,False)
         #self.work_space_tool.ui.spacing_lineEdit.setEnabled(False)
+        '''
 
     def terminate_self(self):
         '''
@@ -821,6 +938,7 @@ class Workspace(QWidget):
             改变网格显示的区域及方法
             res为pvs.OpenFOAMReader读取.foam文件后生成的对象
         '''
+        '''
         res_MeshRegions = []
         if res:
             for i in range(self.work_space_tool.ui.formLayout.rowCount()):
@@ -836,7 +954,8 @@ class Workspace(QWidget):
             self.pv_splitter.setVisible(False)
             self.pv_splitter.setVisible(True)
         else:
-            pass
+            pass'''
+        pass
 
     def check_is_working_dir_mesh_tran(self):
         '''
@@ -914,6 +1033,7 @@ class Workspace(QWidget):
         '''
             网格检查功能
         '''
+        '''
         self.mesh_chack_enable(False)
         QApplication.processEvents()
         mesh_check_sh_default = self.pimplefoam_root + "/gui/Checkmesh/mesh_check.sh"
@@ -923,12 +1043,15 @@ class Workspace(QWidget):
             self.workingdirectory + ' ' + '1')
         #self.process.waitForFinished()
         self.process.finished.connect(lambda:self.mesh_chack_enable(True))
+        '''
+        pass
 
     def mesh_chack_enable(self,bool):
+        pass
         #self.work_space_tool.ui.pushButton.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_2.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_3.setEnabled(bool)
-        self.work_space_tool.ui.pushButton_4.setEnabled(bool)
+        #self.work_space_tool.ui.pushButton_4.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_15.setEnabled(bool)
         #self.work_space_tool.ui.pushButton_16.setEnabled(bool)
         

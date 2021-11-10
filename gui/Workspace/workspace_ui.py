@@ -174,8 +174,8 @@ class Ui_Workspace(QWidget):
         self.verticalLayout_2.addWidget(self.tabWidget_2)
         self.verticalLayout_2.addWidget(self.pushButton_beam)
 
-        #self.pic_path =  '/amd_share/online1/install/truss_bridge/SALOME-9.4.0-CO7-SRC/asterstudy/gui/Workspace'
-        self.pic_path = '/usr/sw-cluster/simforge/code_aster_14.6/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace'
+        self.pic_path =  '/amd_share/online1/install/truss_bridge/SALOME-9.4.0-CO7-SRC/asterstudy/gui/Workspace'
+        #self.pic_path = '/usr/sw-cluster/simforge/code_aster_14.6/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace'
         self.tab0_init()
         self.tab1_init()
         self.tab2_init()
@@ -303,14 +303,15 @@ class Ui_Workspace(QWidget):
         self.h_layout.addWidget(self.modes_button)  
         
         self.pushButton_4 = QtWidgets.QPushButton(self.groupBox_3)
-        self.pushButton_test = QtWidgets.QPushButton('终止计算',self.groupBox_3)
+        self.pushButton_break = QtWidgets.QPushButton('终止计算',self.groupBox_3)
+        self.pushButton_break.setEnabled(False)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap("/usr/sw-cluster/simforge/PFsalome/SALOME-9.4.0-CO7-SRC/BINARIES-CO7/ASTERSTUDY/lib/python3.6/site-packages/asterstudy/gui/Workspace/检查 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         #self.pushButton_4.setIcon(icon5)
         self.pushButton_4.setObjectName("pushButton_4")
 
         self.h_layout_test.addWidget(self.pushButton_4)
-        self.h_layout_test.addWidget(self.pushButton_test)
+        self.h_layout_test.addWidget(self.pushButton_break)
 
         self.v_layout.addLayout(self.h_layout)
         #self.v_layout.addWidget(self.pushButton_4)
@@ -498,7 +499,7 @@ class Ui_Workspace(QWidget):
         full_path = self.pic_path + '/' + pic_name
         pic_label.setPixmap(QPixmap(full_path)) 
         pic_label.setScaledContents(True)
-        pic_label.setMaximumSize(200,100)
+        pic_label.setMaximumSize(140,70)
         self.tab0_H = QtWidgets.QLabel('E:',self.tab0)
         self.tab0_H_value = QtWidgets.QLineEdit('0.1',self.tab0)
         self.tab0_H_unit = QtWidgets.QLabel('m',self.tab0)
@@ -517,7 +518,7 @@ class Ui_Workspace(QWidget):
         #pic_label.setPixmap(QPixmap('F:/WORK/APP_dev/truss_bridge_gui/gui/Workspace/cross_section.png'))  
         pic_label.setPixmap(QPixmap(full_path))
         pic_label.setScaledContents(True)
-        pic_label.setMaximumSize(100,100)
+        pic_label.setMaximumSize(70,70)
         self.tab1_H = QtWidgets.QLabel('H:',self.tab1)
         self.tab1_H_value = QtWidgets.QLineEdit('0.1',self.tab1)
         self.tab1_H_unit = QtWidgets.QLabel('m',self.tab1)
@@ -536,7 +537,7 @@ class Ui_Workspace(QWidget):
         full_path = self.pic_path + '/' + pic_name
         self.pic_label.setPixmap(QPixmap(full_path)) 
         self.pic_label.setScaledContents(True)
-        self.pic_label.setMaximumSize(100,100)
+        self.pic_label.setMaximumSize(70,70)
         self.tab2_H = QtWidgets.QLabel('H:',self.tab2)
         self.tab2_H_value = QtWidgets.QLineEdit('0.1',self.tab2)
         self.tab2_H_unit =  QtWidgets.QLabel('m',self.tab2)
@@ -553,7 +554,7 @@ class Ui_Workspace(QWidget):
         full_path = self.pic_path + '/' + pic_name
         self.pic_label.setPixmap(QPixmap(full_path)) 
         self.pic_label.setScaledContents(True)
-        self.pic_label.setMaximumSize(100,100)
+        self.pic_label.setMaximumSize(70,70)
         self.tab3_H = QtWidgets.QLabel('H:',self.tab3)
         self.tab3_H_value = QtWidgets.QLineEdit('0.1',self.tab3)
         self.tab3_H_unit = QtWidgets.QLabel('m',self.tab3)
@@ -570,7 +571,7 @@ class Ui_Workspace(QWidget):
         full_path = self.pic_path + '/' + pic_name
         self.pic_label.setPixmap(QPixmap(full_path)) 
         self.pic_label.setScaledContents(True)
-        self.pic_label.setMaximumSize(100,100)
+        self.pic_label.setMaximumSize(70,70)
         self.tab4_H = QtWidgets.QLabel('H:',self.tab4)
         self.tab4_H_value = QtWidgets.QLineEdit('0.1',self.tab4)
         self.tab4_H_unit = QtWidgets.QLabel('m',self.tab4)

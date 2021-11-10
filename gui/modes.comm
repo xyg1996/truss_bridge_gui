@@ -1,0 +1,87 @@
+DEBUT()
+
+
+mesh = LIRE_MAILLAGE(FORMAT='MED', UNITE=2)
+
+model0 = AFFE_MODELE(
+    AFFE=(
+        _F(GROUP_MA=('road', ), MODELISATION=('DKT', ), PHENOMENE='MECANIQUE'),
+        _F(
+            GROUP_MA=('all_beams', ),
+            MODELISATION=('POU_D_E', ),
+            PHENOMENE='MECANIQUE'
+        )
+    ),
+    MAILLAGE=mesh
+)
+
+elempro0 = AFFE_CARA_ELEM(
+    COQUE=_F(EPAIS=0.2, GROUP_MA=('road', )),
+    MODELE=model0,
+    POUTRE=(
+        _F(
+            CARA=('H', ),
+            GROUP_MA=('top_beams', ),
+            SECTION='RECTANGLE',
+            VALE=(0.5, )
+        ), _F(
+            CARA=('H', ),
+            GROUP_MA=('main_beams', ),
+            SECTION='RECTANGLE',
+            VALE=(0.1, )
+        ), _F(
+            CARA=('H', ),
+            GROUP_MA=('bottom_beams', ),
+            SECTION='RECTANGLE',
+            VALE=(0.1, )
+        ), _F(
+            CARA=('H', ),
+            GROUP_MA=('lateral_beams', ),
+            SECTION='RECTANGLE',
+            VALE=(0.1, )
+        )
+    )
+)
+
+steel = DEFI_MATERIAU(ELAS=_F(E=2e+11, NU=0.3, RHO=7850.0))
+
+concrete = DEFI_MATERIAU(ELAS=_F(E=25000000000.0, NU=0.2, RHO=2300.0))
+
+fieldmat = AFFE_MATERIAU(
+    AFFE=(
+        _F(GROUP_MA=('all_beams', ), MATER=(steel, )),
+        _F(GROUP_MA=('road', ), MATER=(concrete, ))
+    ),
+    MODELE=model0
+)
+
+load = AFFE_CHAR_MECA(
+    DDL_IMPO=(
+        _F(DX=0.0, DY=0.0, DZ=0.0, GROUP_NO=('left', )),
+        _F(DY=0.0, DZ=0.0, GROUP_NO=('right', ))
+    ),
+    MODELE=model0
+)
+
+ASSEMBLAGE(
+    CARA_ELEM=elempro0,
+    CHAM_MATER=fieldmat,
+    CHARGE=(load, ),
+    MATR_ASSE=(
+        _F(MATRICE=CO('MASS'), OPTION='MASS_MECA'),
+        _F(MATRICE=CO('RIGI'), OPTION='RIGI_MECA')
+    ),
+    MODELE=model0,
+    NUME_DDL=CO('ndll')
+)
+
+unnamed0 = CALC_MODES(
+    CALC_FREQ=_F(NMAX_FREQ=10),
+    MATR_MASS=MASS,
+    MATR_RIGI=RIGI,
+    OPTION='PLUS_PETITE'
+)
+
+IMPR_RESU(FORMAT='MED', RESU=_F(RESULTAT=unnamed0), UNITE=80)
+
+FIN()

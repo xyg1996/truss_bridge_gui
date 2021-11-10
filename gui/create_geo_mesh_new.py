@@ -316,11 +316,10 @@ smesh.SetName(left_3, 'left')
 #work_dir = '/amd_share/online1/install/truss_bridge/script'
 fname = 'Mesh_1.med'
 ### linux work_dir
-fdir = os.path.join(work_dir[0:(len(work_dir)-1)],fname)
+#fdir = os.path.join(work_dir[0:(len(work_dir)-1)],fname)
 #fdir = '/amd_share/online1/install/truss_bridge/script/Mesh_1.med'
-### linux work_dir
-#fdir = '/home/export/online3/amd_share/truss_bridge_app/Mesh_1.med'
-#fdir = os.path.join(work_dir[0:(len(work_dir))],fname)
+fdir = '/amd_share/online1/install/truss_bridge/code_aster_dir/Mesh_1.med'
+
 print('fdir:',fdir)
 try:
   Compound_Mesh_1.ExportMED(r'%s' % fdir,auto_groups=0,minor=40,overwrite=1,meshPart=None,autoDimension=1)
@@ -329,7 +328,7 @@ except:
 
 ### linux work_dir
 
-'''
+
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_38aewvdt.xao')
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_psxtkyub.xao')
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_adr_mof0.xao')
@@ -338,20 +337,19 @@ os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_fiasnwck.xao')
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_a4lvhf2x.xao')
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_c503qf1h.xao')
 os.remove(work_dir[0:(len(work_dir)-1)]+'/shaper_jmx8crsu.xao')
-'''
+
 ### linux work_dir
-'''
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_38aewvdt.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_psxtkyub.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_adr_mof0.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_ho2dmb_g.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_fiasnwck.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_a4lvhf2x.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_c503qf1h.xao')
-os.remove(work_dir[0:(len(work_dir))]+'\shaper_jmx8crsu.xao')
-'''
+
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_38aewvdt.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_psxtkyub.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_adr_mof0.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_ho2dmb_g.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_fiasnwck.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_a4lvhf2x.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_c503qf1h.xao')
+#os.remove(work_dir[0:(len(work_dir))]+'\shaper_jmx8crsu.xao')
 
 
-if salome.sg.hasDesktop():
-  #salome.sg.updateObjBrowser()
-  pass
+#if salome.sg.hasDesktop():
+#  #salome.sg.updateObjBrowser()
+#  pass
