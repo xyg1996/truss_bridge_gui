@@ -64,7 +64,7 @@ load = AFFE_CHAR_MECA(
         _F(DY=0.0, DZ=0.0, GROUP_NO=('right', ))
     ),
     MODELE=model0,
-    PRES_REP=_F(GROUP_MA=('road', ), PRES=10000000.0)
+    PRES_REP=_F(GROUP_MA=('road', ), PRES=100000.0)
 )
 
 reslin = MECA_STATIQUE(

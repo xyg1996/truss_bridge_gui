@@ -98,16 +98,16 @@ class Workspace_tool(QWidget):
         ###Signal creation
         # self.ui.pushButton.clicked.connect(self.pop_mesh_tran_man)
 
-        self.ui.pushButton_12.setEnabled(False)
+        #self.ui.pushButton_12.setEnabled(False)
 
-        self.ui.pushButton_5.clicked.connect(self.pop_mat_man)
-        self.ui.pushButton_6.clicked.connect(self.pop_mod_man)
-        self.ui.pushButton_7.clicked.connect(self.pop_BC_man)
-        self.ui.pushButton_8.clicked.connect(self.pop_fie_man)
-        self.ui.pushButton_9.clicked.connect(self.pop_sch_man)
-        self.ui.pushButton_10.clicked.connect(self.pop_sol_man)
+        #self.ui.pushButton_5.clicked.connect(self.pop_mat_man)
+        #self.ui.pushButton_6.clicked.connect(self.pop_mod_man)
+        #self.ui.pushButton_7.clicked.connect(self.pop_BC_man)
+        #self.ui.pushButton_8.clicked.connect(self.pop_fie_man)
+        #self.ui.pushButton_9.clicked.connect(self.pop_sch_man)
+        #self.ui.pushButton_10.clicked.connect(self.pop_sol_man)
         # self.ui.pushButton_3.clicked.connect(self.pop_mesh_generate_man)
-        self.ui.pushButton_14.clicked.connect(self.pop_com_control_man)
+        #self.ui.pushButton_14.clicked.connect(self.pop_com_control_man)
         
 
 
@@ -240,16 +240,17 @@ class Workspace(QWidget):
         self.process2.readyRead.connect(self.dataReady)
         # self.process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
 
-
+        self.change_element_pro() # 自动写入属性
         # 确认按钮
         self.work_space_tool.ui.pushButton_ok.clicked.connect(self.cal_spacing)
         # 还原按钮
         self.work_space_tool.ui.pushButton_reset.clicked.connect(self.reset)
-         # 单元属性应用按钮
+         # 单元属性应用按钮 
         self.work_space_tool.ui.pushButton_beam.clicked.connect(self.change_element_pro)
         self.work_space_tool.ui.apply.clicked.connect(self.change_element_pro)
         # 提交计算
         self.work_space_tool.ui.pushButton_4.clicked.connect(self.submit)
+        self.work_space_tool.ui.pushButton_break.clicked.connect(self.show_result)
         # 打开open foam文件
         #self.work_space_tool.ui.pushButton_2.clicked.connect(lambda:self.open_openfoam_file(self.workingdirectory))
         # 设置工程目录
@@ -264,10 +265,10 @@ class Workspace(QWidget):
         #self.work_space_tool.ui.apply.clicked.connect(lambda:self.change_mesh_display(self.res))
         # 开始计算
         #self.work_space_tool.ui.pushButton_11.clicked.connect(self.disable_some_buttons)
-        self.work_space_tool.ui.pushButton_12.clicked.connect(self.enable_some_buttons)
+        #self.work_space_tool.ui.pushButton_12.clicked.connect(self.enable_some_buttons)
 
-        self.work_space_tool.ui.pushButton_11.clicked.connect(lambda:self.log_tab_widget.setTabEnabled(1,True)) 
-        self.work_space_tool.ui.pushButton_11.clicked.connect(self.prepare_computing)
+        #self.work_space_tool.ui.pushButton_11.clicked.connect(lambda:self.log_tab_widget.setTabEnabled(1,True)) 
+        #self.work_space_tool.ui.pushButton_11.clicked.connect(self.prepare_computing)
         # 切换前处理、计算、后处理
         self.work_space_tool.ui.tabWidget.currentChanged['int'].connect(self.main_tab_change)
         # 打开工程
@@ -275,7 +276,7 @@ class Workspace(QWidget):
         # 中止
     #     self.work_space_tool.ui.pushButton_12.clicked.connect(self.terminate_self())
         # 续算
-        self.work_space_tool.ui.pushButton_13.clicked.connect(self.continue_to_calculate)
+        #self.work_space_tool.ui.pushButton_13.clicked.connect(self.continue_to_calculate)
         
         self.openfoam_error.connect(self.show_openfoam_error)
 
@@ -314,7 +315,40 @@ class Workspace(QWidget):
         with open(file,'r+') as f:
             f.writelines(data)
         f.close
-        
+    def create_modes_comm(self,material1,material2,element,curr_dir,fre):
+        fname = 'modes.comm'
+        file = os.path.join(curr_dir,fname)
+        print('file:',file)
+        data = ''
+        i = 1
+        with open(file,'r+') as f:
+            for line in f.readlines():
+                if(line.find('steel') == 0):
+                    #line = 'width = %s' % (str(self.width1)) + '\n'
+                    line = 'steel = DEFI_MATERIAU(ELAS=_F(E=%s, NU=%s, RHO=%s))' % (material1[0],material1[1],material1[2])  + '\n'
+                if(line.find('concrete') == 0):
+                    line = 'concrete = DEFI_MATERIAU(ELAS=_F(E=%s, NU=%s, RHO=%s))' % (material2[0],material2[1],material2[2])  + '\n'
+
+                if i == 18:
+                    line = '    COQUE=_F(EPAIS=%s, GROUP_MA=(\'road\', )),' % (element[0]) + '\n'
+                if i == 25:
+                    line = '            VALE=(%s, )' % (element[1]) + '\n'
+                if i == 30:
+                    line = '            VALE=(%s, )' % (element[2]) + '\n'
+                if i == 35:
+                    line = '            VALE=(%s, )' % (element[3]) + '\n'
+                if i == 40:
+                    line = '            VALE=(%s, )' % (element[4]) + '\n'
+                if i == 78:
+                    line = '    CALC_FREQ=_F(NMAX_FREQ=%s),' % (fre) + '\n'
+
+                i+=1
+                data += line
+        f.close
+        with open(file,'r+') as f:
+            f.writelines(data)
+        f.close
+
     def change_element_pro(self):
         #from .create_static_comm import create_static_comm
         #fname = 'static.comm' #网格文件
@@ -337,6 +371,7 @@ class Workspace(QWidget):
         self.material2 = [material21,material22,material23]
         try:
             self.create_static_comm(self.material1,self.material2,self.element,self.curr_dir)
+            self.create_modes_comm(self.material1,self.material2,self.element,self.curr_dir,'10')
             #material1=[2e11,0.3,7850]
             #material2=[2.5e10,0.2,2500]
             #element = [0.1,0.2,0.3,0.4,0.5]
@@ -349,7 +384,30 @@ class Workspace(QWidget):
         
     def submit(self):
         if self.work_space_tool.ui.modes_button.isChecked():
-            pass
+            self.fre,ok = QtWidgets.QInputDialog.getText(self,'设置所需模态阶数','请输入阶数：')
+            while ok:
+                self.create_modes_comm(self.material1,self.material2,self.element,self.curr_dir,self.fre)
+                self.disable_some_buttons()
+                self.work_space_tool.ui.pushButton_4.setEnabled(False)
+                #cmd = '/amd_share/online1/install/code_aster_14.6/14.6/bin/as_run '
+                cmd = 'sh '
+                cmd += self.curr_dir
+                cmd += '/submit_2.sh'
+                print('cmd_modes:',cmd)
+                try:
+                    self.process2.start('echo 提交计算')
+                    QApplication.processEvents()
+                    self.process.start(cmd)
+                    #self.process.waitForFinished()
+                    QtWidgets.QMessageBox.information(self, '提示', '已提交计算，请稍等!')
+                    self.work_space_tool.ui.pushButton_4.setEnabled(False)
+                    time.sleep(8)
+                    self.work_space_tool.ui.pushButton_break.setEnabled(True)
+                    self.enable_some_buttons()
+                    ok = 0
+                except:
+                    self.process2.start('echo 提交计算失败') 
+                    ok = 0           
         else:
             self.disable_some_buttons()
             self.work_space_tool.ui.pushButton_4.setEnabled(False)
@@ -359,11 +417,13 @@ class Workspace(QWidget):
             cmd += '/submit.sh'
             print('cmd:',cmd)
             try:
-                self.process.start('echo 已提交计算')
+                self.process.start('echo 提交计算')
                 QApplication.processEvents()
                 self.process.start(cmd)
-                #self.curr_dir = os.popen('echo `pwd`').read()[0:-1]
-                #os.popen(cmd)
+                #self.process.waitForFinished()
+                QtWidgets.QMessageBox.information(self, '提示', '已提交计算，请稍等!')
+                self.work_space_tool.ui.pushButton_4.setEnabled(False)
+                time.sleep(8)
                 self.work_space_tool.ui.pushButton_break.setEnabled(True)
                 self.enable_some_buttons()
             except:
@@ -439,6 +499,135 @@ class Workspace(QWidget):
         self.work_space_tool.ui.sections_lineEdit.setText('8')
         self.work_space_tool.ui.spacing_lineEdit.setText('5')
         self.cal_spacing()
+    def show_modes_result(self):
+        try:
+            if self.currentdisplay:
+                current_display = pvs.GetActiveSource()
+                pvs.Delete(current_display)
+                print('delete ok')
+                self.process.start('echo 清除当前显示')
+                self.process.waitForFinished()
+        except Exception as e:
+            print(e)
+        fname = 'study_modes.rmed'
+        fdir = os.path.join(self.curr_dir,fname)
+        self.process.start('echo 开始显示模态分析结果...')
+        self.process.waitForFinished()
+        self.modes_resrmed = pvs.MEDReader(FileName=fdir)
+        animationScene1 = pvs.GetAnimationScene()
+        self.modes_resrmed.GenerateVectors = 1
+        self.modes_resrmed.ActivateMode = 1
+        self.modes_resrmed.AllTimeSteps = ['0000', '0001', '00010', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009']
+        renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+        modes_resrmedDisplay = pvs.Show(self.modes_resrmed, renderView1)
+        modes_resrmedDisplay.Representation = 'Surface'
+        renderView1.ResetCamera()
+        materialLibrary1 = pvs.GetMaterialLibrary()
+        animationScene1.UpdateAnimationUsingDataTimeSteps()
+        renderView1.Update()
+
+        pvs.Hide(self.modes_resrmed, renderView1)
+        self.warpByVector2 = pvs.WarpByVector(Input=self.modes_resrmed)
+        pvs.SetActiveSource(self.warpByVector2)
+        warpByVector1Display = pvs.Show(self.warpByVector2, renderView1)
+        warpByVector1Display.Representation = 'Surface'
+        warpByVector1Display = pvs.Show(self.warpByVector2, renderView1)
+        self.currentdisplay = self.warpByVector2
+        # The following two lines insure that the view is refreshed
+        self.pv_splitter.setVisible(False)
+        self.pv_splitter.setVisible(True)
+        self.process.start('echo 网格已显示')
+        self.process.waitForFinished()
+        self.work_space_tool.ui.pushButton_4.setEnabled(True)
+        
+        '''
+        warpByVector1.Vectors = ['POINTS', 'unnamed0DEPL [01] - 1.95564_Vector']
+        renderView1.Update()
+        # set scalar coloring
+        pvs.ColorBy(warpByVector1Display, ('POINTS', 'unnamed0DEPL [00] - 1.76646', 'Magnitude'))
+
+        # rescale color and/or opacity maps used to include current data range
+        warpByVector1Display.RescaleTransferFunctionToDataRange(True, False)
+
+        # show color bar/color legend
+        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
+
+        # get color transfer function/color map for 'unnamed0DEPL00176646'
+        unnamed0DEPL00176646LUT = pvs.GetColorTransferFunction('unnamed0DEPL00176646')
+
+        # get opacity transfer function/opacity map for 'unnamed0DEPL00176646'
+        unnamed0DEPL00176646PWF = pvs.GetOpacityTransferFunction('unnamed0DEPL00176646')
+
+        # Properties modified on warpByVector1
+        warpByVector1.Vectors = ['POINTS', 'unnamed0DEPL [03] - 2.74502_Vector']
+
+        # update the view to ensure updated data information
+        renderView1.Update()'''
+
+    def show_result(self):
+        if self.work_space_tool.ui.modes_button.isChecked():
+            self.show_modes_result()
+        else:
+            self.show_static_result()
+
+    def show_static_result(self):
+        try:
+            if self.currentdisplay:
+                current_display = pvs.GetActiveSource()
+                pvs.Delete(current_display)
+                print('delete ok')
+                self.process.start('echo 清除当前显示')
+                self.process.waitForFinished()
+        except Exception as e:
+            print(e)
+        fname = 'static_res.rmed'
+        fdir = os.path.join(self.curr_dir,fname)
+        self.process.start('echo 开始显示静力学结果...')
+        self.process.waitForFinished()
+        self.static_resrmed = pvs.MEDReader(FileName=fdir)
+        self.static_resrmed.AllArrays = ['TS0/mesh/ComSup0/reslin__DEPL@@][@@P1']
+        self.static_resrmed.GenerateVectors = 1
+        renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+        static_resrmedDisplay = pvs.Show(self.static_resrmed, renderView1)
+        static_resrmedDisplay.Representation = 'Surface'
+        renderView1.ResetCamera()
+        materialLibrary1 = pvs.GetMaterialLibrary()
+        renderView1.Update()
+        # set scalar coloring
+        pvs.ColorBy(static_resrmedDisplay, ('POINTS', 'reslin__DEPL_Vector', 'Magnitude'))
+        # rescale color and/or opacity maps used to include current data range
+        static_resrmedDisplay.RescaleTransferFunctionToDataRange(True, False)
+        # show color bar/color legend
+        static_resrmedDisplay.SetScalarBarVisibility(renderView1, True)
+        # get color transfer function/color map for 'reslin__DEPL_Vector'
+        reslin__DEPL_VectorLUT = pvs.GetColorTransferFunction('reslin__DEPL_Vector')
+        # get opacity transfer function/opacity map for 'reslin__DEPL_Vector'
+        reslin__DEPL_VectorPWF = pvs.GetOpacityTransferFunction('reslin__DEPL_Vector')
+        # create a new 'Warp By Vector'
+        self.warpByVector1 = pvs.WarpByVector(Input=self.static_resrmed)
+        # set active source
+        pvs.SetActiveSource(self.warpByVector1)
+        # show data in view
+        warpByVector1Display = pvs.Show(self.warpByVector1, renderView1)
+        # trace defaults for the display properties.
+        warpByVector1Display.Representation = 'Surface'
+        # show color bar/color legend
+        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
+        # show data in view
+        warpByVector1Display = pvs.Show(self.warpByVector1, renderView1)
+        # hide data in view
+        pvs.Hide(self.static_resrmed, renderView1)
+        # show color bar/color legend
+        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
+        # update the view to ensure updated data information
+        renderView1.Update()
+        self.currentdisplay = self.warpByVector1
+        # The following two lines insure that the view is refreshed
+        self.pv_splitter.setVisible(False)
+        self.pv_splitter.setVisible(True)
+        self.process.start('echo 网格已显示')
+        self.process.waitForFinished()
+        self.work_space_tool.ui.pushButton_4.setEnabled(True)
 
     def show_mesh_1(self,fdir):
         '''
@@ -517,7 +706,7 @@ class Workspace(QWidget):
         self.simulation_time = compute_control_value_list[0]
         QApplication.processEvents()
         self.process.start('sh '+ self.workingdirectory + '/run.sh '+ self.workingdirectory + ' '+ cores)
-        self.work_space_tool.ui.pushButton_12.clicked.connect(self.terminate_self)
+        #self.work_space_tool.ui.pushButton_12.clicked.connect(self.terminate_self)
         # 画残差图和跟新进度条及旁边文字(预计还剩。。。)
         import _thread
         try:
@@ -537,6 +726,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.apply.setEnabled(True)
         self.work_space_tool.ui.static_button.setEnabled(True)
         self.work_space_tool.ui.modes_button.setEnabled(True)
+        self.work_space_tool.ui.pushButton_4.setEnabled(True)
         '''
         self.work_space_tool.ui.pushButton_5.setEnabled(True)
         self.work_space_tool.ui.pushButton_6.setEnabled(True)
@@ -563,6 +753,7 @@ class Workspace(QWidget):
         self.work_space_tool.ui.apply.setEnabled(False)
         self.work_space_tool.ui.static_button.setEnabled(False)
         self.work_space_tool.ui.modes_button.setEnabled(False)
+        self.work_space_tool.ui.pushButton_break.setEnabled(False)
         '''
         self.work_space_tool.ui.pushButton_5.setEnabled(False)
         self.work_space_tool.ui.pushButton_6.setEnabled(False)
@@ -691,7 +882,7 @@ class Workspace(QWidget):
         self.simulation_time = compute_control_value_list[0]
         QApplication.processEvents()
         self.process.start('sh '+ self.workingdirectory + '/run.sh '+ self.workingdirectory + ' '+ cores)
-        self.work_space_tool.ui.pushButton_12.clicked.connect(self.terminate_self)
+        #self.work_space_tool.ui.pushButton_12.clicked.connect(self.terminate_self)
         # 画残差图和跟新进度条及旁边文字(预计还剩。。。)
         import _thread
         try:
@@ -822,10 +1013,10 @@ class Workspace(QWidget):
             index = 1 代表计算
             index = 2 代表后处理
         '''
-        if index == 1:
+        '''if index == 1:
             if not self.workingdirectory:
-                QtWidgets.QMessageBox.information(self, '错误', '请先设置工程目录!')
-        if index == 2:
+                QtWidgets.QMessageBox.information(self, '错误', '请先设置工程目录!')'''
+        if index == 1:
             import SalomePyQt
             import pvsimple as pvs
             sg = SalomePyQt.SalomePyQt()
