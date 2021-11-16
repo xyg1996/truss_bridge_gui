@@ -385,6 +385,7 @@ class Workspace(QWidget):
     def submit(self):
         if self.work_space_tool.ui.modes_button.isChecked():
             self.fre,ok = QtWidgets.QInputDialog.getText(self,'设置所需模态阶数','请输入阶数：')
+            print('set fre = ',self.fre)
             while ok:
                 self.create_modes_comm(self.material1,self.material2,self.element,self.curr_dir,self.fre)
                 self.disable_some_buttons()
@@ -500,72 +501,155 @@ class Workspace(QWidget):
         self.work_space_tool.ui.spacing_lineEdit.setText('5')
         self.cal_spacing()
     def show_modes_result(self):
-        try:
-            if self.currentdisplay:
-                current_display = pvs.GetActiveSource()
-                pvs.Delete(current_display)
-                print('delete ok')
-                self.process.start('echo 清除当前显示')
+        #choice = self.fre[0]
+        choice_list = self.fre_all
+        #QInputDialog.getItem(self, "select input dialog", '语言列表', items, 0, False)
+        self.fre_show, ok = QtWidgets.QInputDialog.getItem(self, "select", '阶数', choice_list, 0, False)
+        index_id = choice_list.index(self.fre_show)
+        print('index_id:',index_id)
+        if ok:
+            try:
+                if self.currentdisplay:
+                    current_display = pvs.GetActiveSource()
+                    pvs.Delete(current_display)
+                    print('delete ok')
+                    self.process.start('echo 清除当前显示')
+                    self.process.waitForFinished()
+                    
+            except Exception as e:
+                print('show_modes_result error!')
+            try:
+                self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, False)
+                self.process.start('echo 清除bars')
+                fname = 'study_modes.rmed'
+                fdir = os.path.join(self.curr_dir,fname)
+                self.process.start('echo 开始显示模态分析结果...')
                 self.process.waitForFinished()
-        except Exception as e:
-            print(e)
-        fname = 'study_modes.rmed'
-        fdir = os.path.join(self.curr_dir,fname)
-        self.process.start('echo 开始显示模态分析结果...')
-        self.process.waitForFinished()
-        self.modes_resrmed = pvs.MEDReader(FileName=fdir)
-        animationScene1 = pvs.GetAnimationScene()
-        self.modes_resrmed.GenerateVectors = 1
-        self.modes_resrmed.ActivateMode = 1
-        self.modes_resrmed.AllTimeSteps = ['0000', '0001', '00010', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009']
-        renderView1 = pvs.GetActiveViewOrCreate('RenderView')
-        modes_resrmedDisplay = pvs.Show(self.modes_resrmed, renderView1)
-        modes_resrmedDisplay.Representation = 'Surface'
-        renderView1.ResetCamera()
-        materialLibrary1 = pvs.GetMaterialLibrary()
-        animationScene1.UpdateAnimationUsingDataTimeSteps()
-        renderView1.Update()
+                self.modes_resrmed = pvs.MEDReader(FileName=fdir)
+                animationScene1 = pvs.GetAnimationScene()
+                self.modes_resrmed.GenerateVectors = 1
+                self.modes_resrmed.ActivateMode = 1
+                renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+                modes_resrmedDisplay = pvs.Show(self.modes_resrmed, renderView1)
+                modes_resrmedDisplay.Representation = 'Surface'
+                renderView1.ResetCamera()
+                materialLibrary1 = pvs.GetMaterialLibrary()
+                animationScene1.UpdateAnimationUsingDataTimeSteps()
+                renderView1.Update()
 
-        pvs.Hide(self.modes_resrmed, renderView1)
-        self.warpByVector2 = pvs.WarpByVector(Input=self.modes_resrmed)
-        pvs.SetActiveSource(self.warpByVector2)
-        warpByVector1Display = pvs.Show(self.warpByVector2, renderView1)
-        warpByVector1Display.Representation = 'Surface'
-        warpByVector1Display = pvs.Show(self.warpByVector2, renderView1)
-        self.currentdisplay = self.warpByVector2
-        # The following two lines insure that the view is refreshed
-        self.pv_splitter.setVisible(False)
-        self.pv_splitter.setVisible(True)
-        self.process.start('echo 网格已显示')
-        self.process.waitForFinished()
-        self.work_space_tool.ui.pushButton_4.setEnabled(True)
+                pvs.Hide(self.modes_resrmed, renderView1)
+                self.warpByVector2 = pvs.WarpByVector(Input=self.modes_resrmed)
+                self.warpByVector2.ScaleFactor = 3.0
+                pvs.SetActiveSource(self.warpByVector2)
+                self.warpByVector2Display = pvs.Show(self.warpByVector2, renderView1)
+                renderView1.Update()
+                self.warpByVector2Display.Representation = 'Surface'
+                self.warpByVector2.Vectors = ['POINTS', 'unnamed0DEPL [%s] - %s_Vector' %(index_id,self.fre_show[0:7])]
+                pvs.ColorBy(self.warpByVector2Display, ('POINTS', 'unnamed0DEPL [%s] - %s' %(index_id,self.fre_show[0:7]), 'Magnitude'))
+                self.warpByVector2Display.RescaleTransferFunctionToDataRange(True, False)
+                self.warpByVector2Display.SetScalarBarVisibility(renderView1, False)
+                renderView1.Update()
+                self.currentdisplay = self.warpByVector2
+                # The following two lines insure that the view is refreshed
+                self.pv_splitter.setVisible(False)
+                self.pv_splitter.setVisible(True)
+                self.process.start('echo 网格已显示')
+                self.process.waitForFinished()
+                self.work_space_tool.ui.pushButton_4.setEnabled(True)
+            except:
+                fname = 'study_modes.rmed'
+                fdir = os.path.join(self.curr_dir,fname)
+                self.process.start('echo 开始显示模态分析结果...')
+                self.process.waitForFinished()
+                self.modes_resrmed = pvs.MEDReader(FileName=fdir)
+                animationScene1 = pvs.GetAnimationScene()
+                self.modes_resrmed.GenerateVectors = 1
+                self.modes_resrmed.ActivateMode = 1
+                renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+                modes_resrmedDisplay = pvs.Show(self.modes_resrmed, renderView1)
+                modes_resrmedDisplay.Representation = 'Surface'
+                renderView1.ResetCamera()
+                materialLibrary1 = pvs.GetMaterialLibrary()
+                animationScene1.UpdateAnimationUsingDataTimeSteps()
+                renderView1.Update()
+
+                pvs.Hide(self.modes_resrmed, renderView1)
+                self.warpByVector2 = pvs.WarpByVector(Input=self.modes_resrmed)
+                self.warpByVector2.ScaleFactor = 3.0
+                pvs.SetActiveSource(self.warpByVector2)
+                self.warpByVector2Display = pvs.Show(self.warpByVector2, renderView1)
+                renderView1.Update()
+                self.warpByVector2Display.Representation = 'Surface'
+                self.warpByVector2.Vectors = ['POINTS', 'unnamed0DEPL [%s] - %s_Vector' %(index_id,self.fre_show[0:7])]
+                pvs.ColorBy(self.warpByVector2Display, ('POINTS', 'unnamed0DEPL [%s] - %s' %(index_id,self.fre_show[0:7]), 'Magnitude'))
+                self.warpByVector2Display.RescaleTransferFunctionToDataRange(True, False)
+                self.warpByVector2Display.SetScalarBarVisibility(renderView1, False)
+                renderView1.Update()
+                self.currentdisplay = self.warpByVector2
+                # The following two lines insure that the view is refreshed
+                self.pv_splitter.setVisible(False)
+                self.pv_splitter.setVisible(True)
+                self.process.start('echo 网格已显示')
+                self.process.waitForFinished()
+                self.work_space_tool.ui.pushButton_4.setEnabled(True)
         
-        '''
-        warpByVector1.Vectors = ['POINTS', 'unnamed0DEPL [01] - 1.95564_Vector']
-        renderView1.Update()
-        # set scalar coloring
-        pvs.ColorBy(warpByVector1Display, ('POINTS', 'unnamed0DEPL [00] - 1.76646', 'Magnitude'))
+    
+    def read_fre(self):
+        file = self.curr_dir + '/modes.mess'
+        num = int(self.fre)
+        print('num:',num)
+        data = ''
+        i = 1
+        id_modal = 0
+        with open(file,'r+') as f:
+            for line in f.readlines():
+                if(line.find('     Calcul modal') == 0):
+                    #line = 'width = %s' % (str(self.width1)) + '\n'
+                    print('modal:',i)
+                    id_modal = i
+                if i >= (id_modal + 4) and i <= (id_modal + 4 + num -1) and id_modal:
+                    data +=line
+                i+=1
+        f.close
+        '''try:
+            with open(file,'r+') as f:
+                for line in f.readlines():
+                    if(line.find('     Calcul modal') == 0):
+                        #line = 'width = %s' % (str(self.width1)) + '\n'
+                        print('modal:',i)
+                        id_modal = i
+                    if i >= (id_modal + 4) and i <= (id_modal + 4 + num -1) and id_modal:
+                        data +=line
+                    i+=1
+            f.close
+        except:
+            print('error! Not find frequency result!')
+                #data += line'''
+        
+        print('id_modal:',id_modal)
+        print(data.split())
+        fre_data = data.split()
+        self.fre_all = []
+        for i in range(1,len(fre_data),3):
+            #print(fre_data[i])
+            self.fre_all.append(fre_data[i])
+        print('fre:',self.fre_all)
+        self.fre_num = []
+        for i in self.fre_all:
+            j = i[0:7]
+            self.fre_num.append(j)
+        print('fre_num:',self.fre_num)
 
-        # rescale color and/or opacity maps used to include current data range
-        warpByVector1Display.RescaleTransferFunctionToDataRange(True, False)
-
-        # show color bar/color legend
-        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
-
-        # get color transfer function/color map for 'unnamed0DEPL00176646'
-        unnamed0DEPL00176646LUT = pvs.GetColorTransferFunction('unnamed0DEPL00176646')
-
-        # get opacity transfer function/opacity map for 'unnamed0DEPL00176646'
-        unnamed0DEPL00176646PWF = pvs.GetOpacityTransferFunction('unnamed0DEPL00176646')
-
-        # Properties modified on warpByVector1
-        warpByVector1.Vectors = ['POINTS', 'unnamed0DEPL [03] - 2.74502_Vector']
-
-        # update the view to ensure updated data information
-        renderView1.Update()'''
+    def select_modes(self):
+        #choice = self.fre[0]
+        choice_list = self.fre_all
+        #QInputDialog.getItem(self, "select input dialog", '语言列表', items, 0, False)
+        self.fre_show, ok = QtWidgets.QInputDialog.getItem(self, "select", '阶数', choice_list, 0, False)
 
     def show_result(self):
         if self.work_space_tool.ui.modes_button.isChecked():
+            self.read_fre() # 读取模态结果
+            time.sleep(0.5)
             self.show_modes_result()
         else:
             self.show_static_result()
@@ -587,18 +671,18 @@ class Workspace(QWidget):
         self.static_resrmed = pvs.MEDReader(FileName=fdir)
         self.static_resrmed.AllArrays = ['TS0/mesh/ComSup0/reslin__DEPL@@][@@P1']
         self.static_resrmed.GenerateVectors = 1
-        renderView1 = pvs.GetActiveViewOrCreate('RenderView')
-        static_resrmedDisplay = pvs.Show(self.static_resrmed, renderView1)
+        self.renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+        static_resrmedDisplay = pvs.Show(self.static_resrmed, self.renderView1)
         static_resrmedDisplay.Representation = 'Surface'
-        renderView1.ResetCamera()
+        self.renderView1.ResetCamera()
         materialLibrary1 = pvs.GetMaterialLibrary()
-        renderView1.Update()
+        self.renderView1.Update()
         # set scalar coloring
         pvs.ColorBy(static_resrmedDisplay, ('POINTS', 'reslin__DEPL_Vector', 'Magnitude'))
         # rescale color and/or opacity maps used to include current data range
         static_resrmedDisplay.RescaleTransferFunctionToDataRange(True, False)
         # show color bar/color legend
-        static_resrmedDisplay.SetScalarBarVisibility(renderView1, True)
+        static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, True)
         # get color transfer function/color map for 'reslin__DEPL_Vector'
         reslin__DEPL_VectorLUT = pvs.GetColorTransferFunction('reslin__DEPL_Vector')
         # get opacity transfer function/opacity map for 'reslin__DEPL_Vector'
@@ -608,19 +692,19 @@ class Workspace(QWidget):
         # set active source
         pvs.SetActiveSource(self.warpByVector1)
         # show data in view
-        warpByVector1Display = pvs.Show(self.warpByVector1, renderView1)
+        self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
         # trace defaults for the display properties.
-        warpByVector1Display.Representation = 'Surface'
+        self.warpByVector1Display.Representation = 'Surface'
         # show color bar/color legend
-        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
+        self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
         # show data in view
-        warpByVector1Display = pvs.Show(self.warpByVector1, renderView1)
+        self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
         # hide data in view
-        pvs.Hide(self.static_resrmed, renderView1)
+        pvs.Hide(self.static_resrmed, self.renderView1)
         # show color bar/color legend
-        warpByVector1Display.SetScalarBarVisibility(renderView1, True)
+        self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
         # update the view to ensure updated data information
-        renderView1.Update()
+        self.renderView1.Update()
         self.currentdisplay = self.warpByVector1
         # The following two lines insure that the view is refreshed
         self.pv_splitter.setVisible(False)
