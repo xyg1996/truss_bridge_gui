@@ -71,7 +71,7 @@ class Ui_Workspace(QWidget):
         self.spacing_label = QtWidgets.QLabel('间距:')
         #self.label.setObjectName("label")
         #self.verticalLayout_7.addWidget(self.label)
-        self.width_lineEdit = QtWidgets.QLineEdit('7')
+        self.width_lineEdit = QtWidgets.QLineEdit('8')
         self.length_lineEdit = QtWidgets.QLineEdit('40')
         self.height_lineEdit = QtWidgets.QLineEdit('5')
         self.sections_lineEdit = QtWidgets.QLineEdit('8')

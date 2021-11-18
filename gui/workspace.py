@@ -280,7 +280,7 @@ class Workspace(QWidget):
         
         self.openfoam_error.connect(self.show_openfoam_error)
 
-    def create_static_comm(self,material1,material2,element,curr_dir):
+    def create_static_comm(self,material1,material2,element,curr_dir,pres):
         #file = work_dir + '/static.comm'
         fname = 'static.comm'
         file = os.path.join(curr_dir,fname)
@@ -307,7 +307,8 @@ class Workspace(QWidget):
                     line = '            VALE=(%s, )' % (element[3]) + '\n'
                 if i == 45:
                     line = '            VALE=(%s, )' % (element[4]) + '\n'
-
+                if i == 67:
+                    line = '    PRES_REP=_F(GROUP_MA=(\'road\', ), PRES=%s)' % (pres) + '\n'
                 i+=1
                 data += line
         f.close
@@ -315,6 +316,7 @@ class Workspace(QWidget):
         with open(file,'r+') as f:
             f.writelines(data)
         f.close
+
     def create_modes_comm(self,material1,material2,element,curr_dir,fre):
         fname = 'modes.comm'
         file = os.path.join(curr_dir,fname)
@@ -369,8 +371,10 @@ class Workspace(QWidget):
         material22 = self.work_space_tool.ui.poisson_value_road.text()
         material23 = self.work_space_tool.ui.rho_value_road.text()
         self.material2 = [material21,material22,material23]
+        for i in self.element + self.material1 + self.material2:
+            self.check_parameter_isnum(i)
         try:
-            self.create_static_comm(self.material1,self.material2,self.element,self.curr_dir)
+            self.create_static_comm(self.material1,self.material2,self.element,self.curr_dir,'1e5')
             self.create_modes_comm(self.material1,self.material2,self.element,self.curr_dir,'10')
             #material1=[2e11,0.3,7850]
             #material2=[2.5e10,0.2,2500]
@@ -386,7 +390,7 @@ class Workspace(QWidget):
         if self.work_space_tool.ui.modes_button.isChecked():
             self.fre,ok = QtWidgets.QInputDialog.getText(self,'设置所需模态阶数','请输入阶数：')
             print('set fre = ',self.fre)
-            while ok:
+            while ok and self.check_parameter_isnum(self.fre) and self.check_parameter_isint(self.fre):
                 self.create_modes_comm(self.material1,self.material2,self.element,self.curr_dir,self.fre)
                 self.disable_some_buttons()
                 self.work_space_tool.ui.pushButton_4.setEnabled(False)
@@ -410,25 +414,30 @@ class Workspace(QWidget):
                     self.process2.start('echo 提交计算失败') 
                     ok = 0           
         else:
-            self.disable_some_buttons()
-            self.work_space_tool.ui.pushButton_4.setEnabled(False)
+            self.pres,ok = QtWidgets.QInputDialog.getText(self,'设置压力','请输入压力/Pa：')
             #cmd = '/amd_share/online1/install/code_aster_14.6/14.6/bin/as_run '
-            cmd = 'sh '
-            cmd += self.curr_dir
-            cmd += '/submit.sh'
-            print('cmd:',cmd)
-            try:
-                self.process.start('echo 提交计算')
-                QApplication.processEvents()
-                self.process.start(cmd)
-                #self.process.waitForFinished()
-                QtWidgets.QMessageBox.information(self, '提示', '已提交计算，请稍等!')
+            while ok and self.check_parameter_isnum(self.pres):
+                self.disable_some_buttons()
                 self.work_space_tool.ui.pushButton_4.setEnabled(False)
-                time.sleep(8)
-                self.work_space_tool.ui.pushButton_break.setEnabled(True)
-                self.enable_some_buttons()
-            except:
-                self.process.start('echo 提交计算失败')
+                self.create_static_comm(self.material1,self.material2,self.element,self.curr_dir,self.pres)    
+                cmd = 'sh '
+                cmd += self.curr_dir
+                cmd += '/submit.sh'
+                print('cmd:',cmd)
+                try:
+                    self.process2.start('echo 提交计算')
+                    QApplication.processEvents()
+                    self.process.start(cmd)
+                    #self.process.waitForFinished()
+                    QtWidgets.QMessageBox.information(self, '提示', '已提交计算，请稍等!')
+                    self.work_space_tool.ui.pushButton_4.setEnabled(False)
+                    time.sleep(8)
+                    self.work_space_tool.ui.pushButton_break.setEnabled(True)
+                    self.enable_some_buttons()
+                    ok = 0
+                except:
+                    self.process2.start('echo 提交计算失败')
+                    ok = 0
     
     def check_parameter_isnum(self,num):
         try:
@@ -436,11 +445,25 @@ class Workspace(QWidget):
             s=str(num).split('.')
             if float(s[1])==0:
                 print('整数')
+                return True
             else :
                 print('小数')
+                return True
         except:
             print("输入的不是数字!")
             QtWidgets.QMessageBox.information(self, '错误', '请输入数字!')
+            return False
+
+    def check_parameter_isint(self,num):
+        num = float(num)
+        s=str(num).split('.')
+        if float(s[1])==0:
+            print('整数')
+            return True
+        else :
+            print('小数')
+            QtWidgets.QMessageBox.information(self, '错误', '请输入整数!')
+            return False       
 
     def check_iseven(self,num):
         s=str(float(num)).split('.')
@@ -494,12 +517,13 @@ class Workspace(QWidget):
         self.show_mesh_1(fdir_curr)
 
     def reset(self):
-        self.work_space_tool.ui.width_lineEdit.setText('7')
+        self.work_space_tool.ui.width_lineEdit.setText('8')
         self.work_space_tool.ui.length_lineEdit.setText('40')
         self.work_space_tool.ui.height_lineEdit.setText('5')
         self.work_space_tool.ui.sections_lineEdit.setText('8')
         self.work_space_tool.ui.spacing_lineEdit.setText('5')
         self.cal_spacing()
+
     def show_modes_result(self):
         #choice = self.fre[0]
         choice_list = self.fre_all
@@ -520,43 +544,12 @@ class Workspace(QWidget):
                 print('show_modes_result error!')
             try:
                 self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, False)
-                self.process.start('echo 清除bars')
-                fname = 'study_modes.rmed'
-                fdir = os.path.join(self.curr_dir,fname)
-                self.process.start('echo 开始显示模态分析结果...')
-                self.process.waitForFinished()
-                self.modes_resrmed = pvs.MEDReader(FileName=fdir)
-                animationScene1 = pvs.GetAnimationScene()
-                self.modes_resrmed.GenerateVectors = 1
-                self.modes_resrmed.ActivateMode = 1
-                renderView1 = pvs.GetActiveViewOrCreate('RenderView')
-                modes_resrmedDisplay = pvs.Show(self.modes_resrmed, renderView1)
-                modes_resrmedDisplay.Representation = 'Surface'
-                renderView1.ResetCamera()
-                materialLibrary1 = pvs.GetMaterialLibrary()
-                animationScene1.UpdateAnimationUsingDataTimeSteps()
-                renderView1.Update()
-
-                pvs.Hide(self.modes_resrmed, renderView1)
-                self.warpByVector2 = pvs.WarpByVector(Input=self.modes_resrmed)
-                self.warpByVector2.ScaleFactor = 3.0
-                pvs.SetActiveSource(self.warpByVector2)
-                self.warpByVector2Display = pvs.Show(self.warpByVector2, renderView1)
-                renderView1.Update()
-                self.warpByVector2Display.Representation = 'Surface'
-                self.warpByVector2.Vectors = ['POINTS', 'unnamed0DEPL [%s] - %s_Vector' %(index_id,self.fre_show[0:7])]
-                pvs.ColorBy(self.warpByVector2Display, ('POINTS', 'unnamed0DEPL [%s] - %s' %(index_id,self.fre_show[0:7]), 'Magnitude'))
-                self.warpByVector2Display.RescaleTransferFunctionToDataRange(True, False)
-                self.warpByVector2Display.SetScalarBarVisibility(renderView1, False)
-                renderView1.Update()
-                self.currentdisplay = self.warpByVector2
-                # The following two lines insure that the view is refreshed
-                self.pv_splitter.setVisible(False)
-                self.pv_splitter.setVisible(True)
-                self.process.start('echo 网格已显示')
-                self.process.waitForFinished()
-                self.work_space_tool.ui.pushButton_4.setEnabled(True)
+                self.static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, False)
+                self.process.start('echo 清除图例')
             except:
+                self.process.start('echo 无前置图例...')
+                self.process.waitForFinished()
+            finally:
                 fname = 'study_modes.rmed'
                 fdir = os.path.join(self.curr_dir,fname)
                 self.process.start('echo 开始显示模态分析结果...')
@@ -593,7 +586,6 @@ class Workspace(QWidget):
                 self.process.waitForFinished()
                 self.work_space_tool.ui.pushButton_4.setEnabled(True)
         
-    
     def read_fre(self):
         file = self.curr_dir + '/modes.mess'
         num = int(self.fre)
@@ -648,13 +640,18 @@ class Workspace(QWidget):
 
     def show_result(self):
         if self.work_space_tool.ui.modes_button.isChecked():
-            self.read_fre() # 读取模态结果
+            try:
+                self.read_fre() # 读取模态结果
+            except:
+                QtWidgets.QMessageBox.information(self, '提示', '您还没有计算模态!')
             time.sleep(0.5)
             self.show_modes_result()
         else:
             self.show_static_result()
 
     def show_static_result(self):
+        choice_list = ['位移','应力']
+        self.res_show, ok = QtWidgets.QInputDialog.getItem(self, "select", '结果类型', choice_list, 0, False)
         try:
             if self.currentdisplay:
                 current_display = pvs.GetActiveSource()
@@ -663,55 +660,76 @@ class Workspace(QWidget):
                 self.process.start('echo 清除当前显示')
                 self.process.waitForFinished()
         except Exception as e:
-            print(e)
-        fname = 'static_res.rmed'
-        fdir = os.path.join(self.curr_dir,fname)
-        self.process.start('echo 开始显示静力学结果...')
-        self.process.waitForFinished()
-        self.static_resrmed = pvs.MEDReader(FileName=fdir)
-        self.static_resrmed.AllArrays = ['TS0/mesh/ComSup0/reslin__DEPL@@][@@P1']
-        self.static_resrmed.GenerateVectors = 1
-        self.renderView1 = pvs.GetActiveViewOrCreate('RenderView')
-        static_resrmedDisplay = pvs.Show(self.static_resrmed, self.renderView1)
-        static_resrmedDisplay.Representation = 'Surface'
-        self.renderView1.ResetCamera()
-        materialLibrary1 = pvs.GetMaterialLibrary()
-        self.renderView1.Update()
-        # set scalar coloring
-        pvs.ColorBy(static_resrmedDisplay, ('POINTS', 'reslin__DEPL_Vector', 'Magnitude'))
-        # rescale color and/or opacity maps used to include current data range
-        static_resrmedDisplay.RescaleTransferFunctionToDataRange(True, False)
-        # show color bar/color legend
-        static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, True)
-        # get color transfer function/color map for 'reslin__DEPL_Vector'
-        reslin__DEPL_VectorLUT = pvs.GetColorTransferFunction('reslin__DEPL_Vector')
-        # get opacity transfer function/opacity map for 'reslin__DEPL_Vector'
-        reslin__DEPL_VectorPWF = pvs.GetOpacityTransferFunction('reslin__DEPL_Vector')
-        # create a new 'Warp By Vector'
-        self.warpByVector1 = pvs.WarpByVector(Input=self.static_resrmed)
-        # set active source
-        pvs.SetActiveSource(self.warpByVector1)
-        # show data in view
-        self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
-        # trace defaults for the display properties.
-        self.warpByVector1Display.Representation = 'Surface'
-        # show color bar/color legend
-        self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
-        # show data in view
-        self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
-        # hide data in view
-        pvs.Hide(self.static_resrmed, self.renderView1)
-        # show color bar/color legend
-        self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
-        # update the view to ensure updated data information
-        self.renderView1.Update()
-        self.currentdisplay = self.warpByVector1
-        # The following two lines insure that the view is refreshed
-        self.pv_splitter.setVisible(False)
-        self.pv_splitter.setVisible(True)
-        self.process.start('echo 网格已显示')
-        self.process.waitForFinished()
-        self.work_space_tool.ui.pushButton_4.setEnabled(True)
+                print(e)
+        if self.res_show == '位移' and ok:
+            fname = 'static_res.rmed'
+            fdir = os.path.join(self.curr_dir,fname)
+            self.process.start('echo 开始显示静力学结果...')
+            self.process.waitForFinished()
+            self.static_resrmed = pvs.MEDReader(FileName=fdir)
+            self.static_resrmed.AllArrays = ['TS0/mesh/ComSup0/reslin__DEPL@@][@@P1']
+            self.static_resrmed.GenerateVectors = 1
+            self.renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+            static_resrmedDisplay = pvs.Show(self.static_resrmed, self.renderView1)
+            static_resrmedDisplay.Representation = 'Surface'
+            self.renderView1.ResetCamera()
+            materialLibrary1 = pvs.GetMaterialLibrary()
+            self.renderView1.Update()
+            # set scalar coloring
+            pvs.ColorBy(static_resrmedDisplay, ('POINTS', 'reslin__DEPL_Vector', 'Magnitude'))
+            # rescale color and/or opacity maps used to include current data range
+            static_resrmedDisplay.RescaleTransferFunctionToDataRange(True, False)
+            # show color bar/color legend
+            static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, True)
+            # get color transfer function/color map for 'reslin__DEPL_Vector'
+            reslin__DEPL_VectorLUT = pvs.GetColorTransferFunction('reslin__DEPL_Vector')
+            # get opacity transfer function/opacity map for 'reslin__DEPL_Vector'
+            reslin__DEPL_VectorPWF = pvs.GetOpacityTransferFunction('reslin__DEPL_Vector')
+            # create a new 'Warp By Vector'
+            self.warpByVector1 = pvs.WarpByVector(Input=self.static_resrmed)
+            # set active source
+            pvs.SetActiveSource(self.warpByVector1)
+            # show data in view
+            self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
+            # trace defaults for the display properties.
+            self.warpByVector1Display.Representation = 'Surface'
+            # show color bar/color legend
+            self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
+            # show data in view
+            self.warpByVector1Display = pvs.Show(self.warpByVector1, self.renderView1)
+            # hide data in view
+            pvs.Hide(self.static_resrmed, self.renderView1)
+            # show color bar/color legend
+            self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, True)
+            # update the view to ensure updated data information
+            self.renderView1.Update()
+            self.currentdisplay = self.warpByVector1
+            # The following two lines insure that the view is refreshed
+            self.pv_splitter.setVisible(False)
+            self.pv_splitter.setVisible(True)
+            self.process.start('echo 网格已显示')
+            self.process.waitForFinished()
+            self.work_space_tool.ui.pushButton_4.setEnabled(True)
+        if self.res_show == '应力' and ok:
+            fname = 'static_res.rmed'
+            fdir = os.path.join(self.curr_dir,fname)
+            self.process.start('echo 开始显示静力学结果...')
+            self.process.waitForFinished()
+            self.static_resrmed = pvs.MEDReader(FileName=fdir)
+            self.renderView1 = pvs.GetActiveViewOrCreate('RenderView')
+            self.static_resrmedDisplay = pvs.Show(self.static_resrmed, self.renderView1)
+            self.static_resrmedDisplay.Representation = 'Surface'
+            pvs.ColorBy(self.static_resrmedDisplay, ('POINTS', 'reslin__EFGE_NOEU', 'Magnitude'))
+            self.static_resrmedDisplay.RescaleTransferFunctionToDataRange(True, False)
+            self.static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, True)
+            self.renderView1.Update()
+            self.currentdisplay = self.warpByVector1
+            # The following two lines insure that the view is refreshed
+            self.pv_splitter.setVisible(False)
+            self.pv_splitter.setVisible(True)
+            self.process.start('echo 网格已显示')
+            self.process.waitForFinished()
+            self.work_space_tool.ui.pushButton_4.setEnabled(True)
 
     def show_mesh_1(self,fdir):
         '''
@@ -727,26 +745,27 @@ class Workspace(QWidget):
                 self.process.waitForFinished()
         except Exception as e:
             print(e)
-        self.process.start('echo 开始显示网格...')
-        self.process.waitForFinished()
-        #self.show_mesh_display_list(boundary_file)
-        self.res = pvs.MEDReader(FileName=fdir)
-        self.ren_view = pvs.GetRenderView()
-        self.foamDisplay =pvs.Show(self.res, self.ren_view)
-        #self.foamDisplay.SetRepresentationType('Surface With Edges')
-        self.currentdisplay = self.foamDisplay
-        # The following two lines insure that the view is refreshed
-        self.pv_splitter.setVisible(False)
-        self.pv_splitter.setVisible(True)
-        self.process.start('echo 网格已显示')
-        self.process.waitForFinished()
-        '''boundary_file_root = self.workingdirectory + '/constant/polyMesh/boundary'
-        self.work_space_tool.BCDialog = QDialog()
-        self.work_space_tool.bod_man = Ui_boundary_form()
-        self.work_space_tool.bod_man.setupUi(self.work_space_tool.BCDialog,self.workingdirectory,self.pimplefoam_root, boundary_file_root)
-        self.work_space_tool.mod_man.Model_selecting.connect(self.update_dialog_by_model_and_boundary)
-        self.work_space_tool.BCDialog.setWindowModality(Qt.ApplicationModal)
-        self.work_space_tool.bod_man.MainDialog.setWindowModality(Qt.ApplicationModal)'''
+        try:
+            self.warpByVector1Display.SetScalarBarVisibility(self.renderView1, False)
+            self.static_resrmedDisplay.SetScalarBarVisibility(self.renderView1, False)
+            self.process.start('echo 清除图例')
+        except:
+            self.process.start('echo 无前置图例...')
+            self.process.waitForFinished()
+        finally:
+            self.process.start('echo 开始显示网格...')
+            self.process.waitForFinished()
+            #self.show_mesh_display_list(boundary_file)
+            self.res = pvs.MEDReader(FileName=fdir)
+            self.ren_view = pvs.GetRenderView()
+            self.foamDisplay =pvs.Show(self.res, self.ren_view)
+            #self.foamDisplay.SetRepresentationType('Surface With Edges')
+            self.currentdisplay = self.foamDisplay
+            # The following two lines insure that the view is refreshed
+            self.pv_splitter.setVisible(False)
+            self.pv_splitter.setVisible(True)
+            self.process.start('echo 网格已显示')
+            self.process.waitForFinished()
 
     def change_bridge(self,fdir):
         data = ''
